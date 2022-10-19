@@ -33,6 +33,7 @@
 
 ### CMake ###
 cmake-build-debug
+CMakeFiles
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
