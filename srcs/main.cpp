@@ -1,6 +1,13 @@
 #include <iostream>
+#include <array>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+
+  int a[10];
+  std::array<int, 3> myArray;
+  std:
+  array();
+//  a.
+  std::cout << "Hello, World!" << std::endl;
+  return 0;
 }
