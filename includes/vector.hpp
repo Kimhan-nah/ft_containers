@@ -12,6 +12,7 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
+// for std::allocator<T>
 #include <memory>
 
 namespace ft {
