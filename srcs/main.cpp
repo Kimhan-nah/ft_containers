@@ -1,17 +1,24 @@
-#include <array>
 #include <iostream>
+#include <vector>
 
+/*
+        template <
+                class T,
+                class Alloc = allocator<T>
+        > class vector;
+*/
 int main() {
-  int a[10];
-  std::array<int, 3> myArray;
-std:
-  // array();
-  //  a.
-  hello world
+  std::vector<int> v1;
 
-          std::cout
-      << "Hello, World!" << std::endl;
-  std::cout << "djsaklfjdslkjflksjadlfjsadlkfj;adfjlkdsjfkl;ajslkfjdlsajf;"
-               "skjlfjs;dkfjlsdjflkasdjlkfjsdlf";
+  v1.push_back(3);
+  v1.push_back(4);
+  v1.push_back(5);
+  v1.push_back(6);
+  v1.push_back(7);
+  v1.push_back(8);
+
+  for (std::vector<int>::iterator mysweetiterator = v1.begin();
+       mysweetiterator != v1.end(); mysweetiterator++)
+    std::cout << *mysweetiterator << std::endl;
   return 0;
 }

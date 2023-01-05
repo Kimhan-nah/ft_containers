@@ -12,14 +12,39 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-// for std::allocator<T>
+// std::allocator<T>
 #include <memory>
 
 namespace ft {
-template <class T, class Allocator = std::allocator<T> >
+
+template <class T, class Allocator = std::allocator<T>>
 class vector {
  public:
+  typedef T value_type;
+  typedef Allocator allocator_type;
+  typedef reverse_iterator<iterator> reverse_iterator;
+  typedef reverse_iterator<const_iterator> const_reverse_iterator;
+
+  // FUNCTION : push_back, insert, swap, erase, clear,
 };
+
+template <class T, class Allocator = std::allocator<T>>
+bool operator==(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+template <class T, class Allocator = std::allocator<T>>
+bool operator<(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+template <class T, class Allocator = std::allocator<T>>
+bool operator!=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+template <class T, class Allocator = std::allocator<T>>
+bool operator>(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+template <class T, class Allocator = std::allocator<T>>
+bool operator>=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+template <class T, class Allocator = std::allocator<T>>
+bool operator<=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+
+template <class T, class Allocator = std::allocator<T>>
+void swap(vector<T, Allocator>& x,
+          vector<T, Allocator>& y) noexcept(noexcept(x.swap(y)));
+
 }  // namespace ft
 
 #endif  // VECTOR_HPP

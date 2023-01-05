@@ -3,7 +3,7 @@
 //
 
 #include "../includes/vector.hpp"
+
 #include <vector>
 
-namespace ft {
-} // ft
+namespace ft {}  // namespace ft
