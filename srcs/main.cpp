@@ -1,12 +1,6 @@
 #include <iostream>
 #include <vector>
 
-/*
-        template <
-                class T,
-                class Alloc = allocator<T>
-        > class vector;
-*/
 int main() {
   std::vector<int> v1;
 
