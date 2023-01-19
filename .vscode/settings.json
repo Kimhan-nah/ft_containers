@@ -32,6 +32,8 @@
 		"system_error": "cpp",
 		"tuple": "cpp",
 		"utility": "cpp",
-		"deque": "cpp"
+		"deque": "cpp",
+		"concepts": "cpp",
+		"variant": "cpp"
 	}
 }

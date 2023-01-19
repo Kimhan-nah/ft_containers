@@ -14,20 +14,21 @@
 
 // std::ptrdiff_t
 #include <cstddef>
-#include <deque>
+// std::iterator, std::random_access_iterator_tag
+#include <algorithm>
 #include <iterator>
-#include <map>
 #include <vector>
 
 namespace ft {
-// iterator_tags Iterator Tags
-// struct input_iterator_tag {};
-// struct output_iterator_tag {};
-// struct forwward_iterator_tag : public input_iterator_tag {};
-// struct bidirectional_iterator_tag : public forwward_iterator_tag {};
-// struct random_access_iterator_tag : public bidirectional_iterator_tag {};
-
-// iterator class (common iterator class)
+/** SECTION 0. iterator
+ * @brief
+ *
+ * @tparam Category
+ * @tparam T
+ * @tparam Distance
+ * @tparam Pointer - T*
+ * @tparam Reference - T&
+ */
 template <typename Category, typename T, typename Distance = std::ptrdiff_t,
           typename Pointer = T *, typename Reference = T &>
 struct iterator {
@@ -37,12 +38,17 @@ struct iterator {
   typedef Pointer pointer;
   typedef Reference reference;
 };
+// !SECTION
 
-// SECTION 1. iterator_traits
+/** SECTION 1. iterator_traits
+ * @brief uniform interface to the properties of LegacyIterator types
+ * 	LegacyIterator : Input, Output, Forward, Bidirectional, RandomAccess
+ *
+ * @tparam Iter - iterator
+ */
 template <typename Iter>
 struct iterator_traits {
  public:
-  // Member types
   typedef typename Iter::difference_type difference_type;
   typedef typename Iter::value_type value_type;
   typedef typename Iter::pointer pointer;
@@ -50,11 +56,10 @@ struct iterator_traits {
   typedef typename Iter::iterator_category iterator_category;
 };
 
-// template specialization <T *>
+// template specialization <T *> for Array Pointer
 template <typename Tp>
 struct iterator_traits<Tp *> {
  public:
-  // Member type
   typedef std::ptrdiff_t difference_type;
   typedef Tp value_type;
   typedef Tp *pointer;
@@ -66,39 +71,64 @@ struct iterator_traits<Tp *> {
 template <typename Tp>
 struct iterator_traits<const Tp *> {
  public:
-  // Member type
   typedef std::ptrdiff_t difference_type;
-  typedef typename ft::T value_type;
-  typedef const typename T *pointer;
-  typedef const typename T &reference;
+  typedef Tp value_type;
+  typedef const Tp *pointer;
+  typedef const Tp &reference;
   typedef std::random_access_iterator_tag iterator_category;
 };
 // !SECTION
 
-// SECTION 2. reverse_iterator
+/** SECTION 2. reverse_iterator
+ * @brief iterator adaptor that reverses the direction of given iterator
+ *
+ * @tparam Iter - bidirectional iterator type || random-access iterator type
+ */
 template <typename Iter>
-class reverse_iterator {
+class reverse_iterator
+    : public ft::iterator<typename ieterator_traits<Iter>::iterator_category,
+                          typename iterator_traits<Iter>::value_type,
+                          typename iterator_traits<Iter>::difference_type,
+                          typename iterator_triats<Iter>::pointer,
+                          typename iterator_traits<Iter>::reference> {
+ protected:
+  Iter current;
+
  public:
-  // SECTION 2-1. Member types
   typedef Iter iterator_type;
-  typedef typename iterator_traits<Iter>::iterator_category iterator_category;
-  typedef typename iterator_traits<Iter>::value_type value_type;
-  typedef typename iterator_traits<Iter>::difference_type difference__type;
-  typedef typename iterator_traits<Iter>::pointer pointer;
-  typedef typename iterator_traits<Iter>::reference reference;
-  // !SECTION
+  // CHECK traits_type::difference_type ??
 
-  // SECTION 2-2. Member functions
-  reverse_iterator();  // constructor
-  reverse_iterator &operator=(const iterator &refreverse_);
-  // !SECTION
+ public:
+  Iter(void){};
+  explicit reverse_iterator(iterator_type it) : current(it) {}
+  // CHECK GNU, but cpp reference.....
+  explicit reverse_iterator(const iterator_type it) : current(it.u) {}
 
-  // SECTION 2-3. Member objects
-  // TODO reverse_iterator's Member objects : current??
-  // !SECTION
+  template <typename _Iter>
+  reverse_iterator(const reverse_iterator<_Iter> &rev_it) : current() {}
+
+  // CHECK operator=
+  // template <typename Iter_>
+  // reverse_iterator &operator=(const reverse_iterator<It> &it);
+
+  iterator_type base() const;
+
+  reference operator*() const;
+  pointer operator->() const;
+
+  operator[](difference_type n) const;
+
+  reverse_iterator &operator++();
+  reverse_iterator &operator--();
+  reverse_iterator operator++(int);
+  reverse_iterator operator--(int);
+  reverse_iterator operator+(difference_type n) const;
+  reverse_iterator operator-(difference_type n) const;
+  reverse_iterator &operator+=(difference_type n);
+  reverse_iterator &operator-=(difference_type n);
 };
 
-// SECTION 2-4. Non-member functions of reverse_iterator
+// SECTION 2-1. Non-member functions of reverse_iterator
 /*
 // TODO reverse-iterator Non-member functions
         operator==
