@@ -30,11 +30,12 @@ namespace ft {
  */
 template <typename _Iter>
 struct vector_iterator {
+  // CHECK consider inherit iterator_traits to vector_iterator
  public:
-  typedef typename iterator_traits<Iter>::difference_type difference_type;
   typedef typename iterator_traits<Iter>::value_type value_type;
-  typedef typename iterator_traits<Iter>::pointer pointer;
+  typedef typename iterator_traits<Iter>::difference_type difference_type;
   typedef typename iterator_traits<Iter>::reference reference;
+  typedef typename iterator_traits<Iter>::pointer pointer;
   typedef typename iterator_traits<Iter>::iterator_category iterator_category;
 
   vector_iterator() : iterator() {}
@@ -56,7 +57,7 @@ struct vector_iterator<const _Iter> {
 };
 
 /** SECTION 1. vector
- * @brief
+ * @brief Random-access iterator
  *
  * @tparam T - Type of the elements.
  * @tparam Allocator - Type of the allocator object used to define the storage
@@ -88,6 +89,11 @@ class vector {
   // !SECTION
 
   // SECTION 1-2. Member Functions [element access/iterators/capacity/modifiers]
+  // SECTION 1-2-1. constructor
+  /** SECTION (constructor)
+   * @brief ft::vector<T, Alloc>::vector
+   * @note Construct a new vector object
+   */
   vector(void);
   explicit vector(const Allocator& alloc);
   explicit vector(size_type count, const T& value = T(),
@@ -95,18 +101,40 @@ class vector {
   template <typename InputIt>
   vector(InputIt first, InputIt last, const Allocator& alloc = Allocator());
   vector(const vector& other);
-  ~vector();
+  // !SECTION
+
+  /** SECTION (destructor)
+   * @brief ft::vector<T, Alloc>::~vector
+   * @note Destroy the vector object
+   */
+  ~vector(void);
+  // !SECTION
+
+  /** SECTION operator=
+   * @brief ft::vector<T,. Alloc>::operator=
+   *
+   * @param ref
+   * @return vector&
+   */
   vector& operator=(const vector& ref);
-  // assign
-  // get_allocator
+  // !SECTION
 
-  // Element access
+  /** SECTION ft::vector<T, Allocator>::assign
+   * @brief assigns values to the container
+   *
+   * @param count the new size of the container
+   * @param value the value to initialize elements of the container with
+   */
+  void assign(size_type count, const T& value);
+  /**
+   * @tparam InputIt
+   * @param first
+   * @param last
+   */
+  template <typename InputIt>
+  void assign(InputIt first, InputIt last);
+  // !SECTION
 
-  // Iterators
-
-  // Capacity
-
-  // Modifiers
   // !SECTION
 };
 // !SECTION
@@ -142,7 +170,6 @@ void swap(vector<T, Alloc>& lhs, ft::vector<T, Alloc>& rhs);
 // !SECTION
 
 // !SECTION
-
 }  // namespace ft
 
 #endif  // VECTOR_HPP
