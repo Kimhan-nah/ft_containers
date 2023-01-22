@@ -213,14 +213,16 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
   using _Base::_M_start;
 
  public:
+  // SECTION Constructors
   // [23.2.4.1] construct/copy/destroy
   // (assign() and get_allocator() are also listed in this section)
-  /**
+  /** SECTION 0. vector()
    *  @brief  Default constructor creates no elements.
    */
   explicit vector(const allocator_type& __a = allocator_type()) : _Base(__a) {}
+  // !SECTION
 
-  /**
+  /** SECTION 1. vector(n, value, alloc)
    *  @brief  Create a %vector with copies of an exemplar element.
    *  @param  n  The number of elements to initially create.
    *  @param  value  An element to copy.
@@ -232,8 +234,9 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
       : _Base(__n, __a) {
     this->_M_finish = std::uninitialized_fill_n(this->_M_start, __n, __value);
   }
+  // !SECTION
 
-  /**
+  /** SECTION 2. vector(n)
    *  @brief  Create a %vector with default elements.
    *  @param  n  The number of elements to initially create.
    *
@@ -244,8 +247,9 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
     this->_M_finish =
         std::uninitialized_fill_n(this->_M_start, __n, value_type());
   }
+  // !SECTION
 
-  /**
+  /** SECTION 3. vector(vector)
    *  @brief  %Vector copy constructor.
    *  @param  x  A %vector of identical element and allocator types.
    *
@@ -258,8 +262,9 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
     this->_M_finish =
         std::uninitialized_copy(__x.begin(), __x.end(), this->_M_start);
   }
+  // !SECTION 3
 
-  /**
+  /** SECTION 4. vector(InputIt, InputIt, const allocator_type&)
    *  @brief  Builds a %vector from a range.
    *  @param  first  An input iterator.
    *  @param  last  An input iterator.
@@ -281,6 +286,7 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
     typedef typename _Is_integer<_InputIterator>::_Integral _Integral;
     _M_initialize_dispatch(__first, __last, _Integral());
   }
+  // !SECTION 4
 
   /**
    *  The dtor only erases the elements, and note that if the elements
