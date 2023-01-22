@@ -14,6 +14,7 @@
 
 // std::allocator<T>
 #include <memory>
+#include <vector>
 
 // ft::reverse_iterator
 #include "iterator.hpp"
@@ -66,11 +67,34 @@ struct vector_iterator<const Iter> {
 template <typename T, typename Allocator = std::allocator<T> >
 class vector_base {
  protected:
-  vector_base(void) {
-    // allocate()
-  }
+  typedef Allocator allocator_type;
+  typedef typename allocator_type::reference reference;
+  typedef typename allocator_type::const_reference const_reference;
+  typedef typename allocator_type::pointer pointer;
+  typedef typename allocator_type::const_pointer const_pointer;
+  typedef typename allocator_type::pointer pointer;
+  // std::size_t
+  typedef typename allocator_type::size_t size_t;
+  // std::ptrdiff_t
+  typedef typename allocator_type::difference_type difference_type;
+
+  allocator_type _alloc;
+  pointer _begin;    // _m_start (gcc), _begin(llvm)
+  pointer _end;      // _m_finish
+  pointer _end_cap;  // _m_end_of_storage?
+
+  // vector_base constructors
+  explicit vector_base(const allocator_type& alloc)
+      : _alloc(alloc), _begin(NULL), _end(NULL), _end_cap(NULL) {}
+  // : allocator_type(alloc), _begin(NULL), _end(NULL), _end_cap(NULL) {}
+  explicit vector_base(size_type count, const allocator_type& alloc)
+      : _alloc(alloc),
+        _begin(_alloc.allocator(count)),  // allocate & return pointer
+        _end(_begin),
+        _end_cap(_begin + count) {}
   ~vector_base(void) {
-    // deallocate()
+    // TODO destroy() & deallocate()
+    _alloc.deallocate(_begin, _end_cap - _begin);
   }
 };
 // !SECTION 1
@@ -83,24 +107,22 @@ class vector_base {
  * allocation model
  */
 template <typename T, typename Allocator = std::allocator<T> >
-class vector : private vector_base<T, Allocator> {
+// CHECK private || protected || public
+class vector : public vector_base<T, Allocator> {
  private:
   typedef vector_base<T, Allocator> _Base;
 
   // SECTION 2-1. Member types
  public:
   typedef T value_type;
-  typedef Allocator allocator_type;
-  typedef std::size_t size_type;
-  typedef std::ptrdiff_t difference_type;
-  // std::allocator::reference == value_type& == T&
-  typedef typename allocator_type::reference reference;
-  // std::allocator::const_reference == const value_type& == const T&
-  typedef typename allocator_type::const_reference const_reference;
-  // std::allocator::pointer == value_type* == T*
-  typedef typename allocator_type::pointer pointer;
-  // std::allocator::const_pointer == const value_type* == const T*
-  typedef typename allocator_type::const_pointer const_pointer;
+  // typedef Allocator allocator_type;
+  typedef typename _Base::allocator_type allocator_type;
+  typedef typename _Base::reference reference;
+  typedef typename _Base::const_reference const_reference;
+  typedef typename _Base::pointer pointer;
+  typedef typename _Base::const_pointer const_pointer;
+  typedef typename _Base::size_type size_type;
+  typedef typename _Base::difference_type;
 
   // random_access_iterator to value_type
   typedef vector_iterator<pointer> iterator;
@@ -114,20 +136,29 @@ class vector : private vector_base<T, Allocator> {
  public:
   // SECTION 2-2-1. constructor, allocator
   // NOTE (constructor), (destructor), operator=, assign, get_allocator
-  vector(void);
-  explicit vector(const Allocator& alloc)
-      : vector_base<T, Allocator>::vector_base(void) {}  // CHECK Modify _Base
-  explicit vector(size_type count, const T& value = T(),
-                  const Allocator& alloc = Allocator());
+  // vector(void) : _Base(void) {}
+  // 1. default
+  explicit vector(const allocator_type& alloc = allocator_type())
+      : _Base(alloc) {}
+  // 2. fill
+  explicit vector(size_type count, const value_type& value = value_type(),
+                  const allocator_type& alloc = allocator_type())
+      : _Base(count, alloc) {
+    // push_back(value);
+  }
+  // 3. range
   template <typename InputIt>
-  vector(InputIt first, InputIt last, const Allocator& alloc = Allocator());
-  vector(const vector& other);
+  vector(InputIt first, InputIt last,
+         const allocator_type& alloc = allocator_type())
+      : _Base(alloc) {}
+  // 4. copy
+  vector(const vector& other) {}
 
   ~vector(void);
 
   vector& operator=(const vector& ref);
 
-  void assign(size_type count, const T& value);
+  void assign(size_type count, const value_type& value);
   template <typename InputIt>
   void assign(InputIt first, InputIt last);
 
