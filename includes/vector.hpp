@@ -144,7 +144,7 @@ class vector : public vector_base<T, Allocator> {
   explicit vector(size_type count, const value_type& value = value_type(),
                   const allocator_type& alloc = allocator_type())
       : _Base(count, alloc) {
-    // push_back(value);
+    // std::uninitailized_fill();
   }
   // 3. range
   template <typename InputIt>
