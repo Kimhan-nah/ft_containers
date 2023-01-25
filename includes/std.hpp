@@ -305,7 +305,7 @@ class vector : protected _Vector_base<_Tp, _Alloc> {
    */
   vector& operator=(const vector& __x);
 
-  /**
+  /** SECTION assign
    *  @brief  Assigns a given value to a %vector.
    *  @param  n  Number of elements to be assigned.
    *  @param  val  Value to be assigned.

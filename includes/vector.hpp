@@ -18,47 +18,9 @@
 
 // ft::reverse_iterator
 #include "iterator.hpp"
+#include "vector_iterator.hpp"
 
 namespace ft {
-
-/** SECTION 0. vector_iterator
- * @brief random_access_iterator (normal_iterator in GNU)
- *
- * @tparam Iter
- * @tparam Container
- *
- * Iterator invalidation : swap, clear, operator=, assign, earse ...
- */
-template <typename Iter>
-struct vector_iterator {
-  // CHECK Consider inherit iterator_traits to vector_iterator
- public:
-  typedef typename iterator_traits<Iter>::value_type value_type;
-  typedef typename iterator_traits<Iter>::difference_type difference_type;
-  typedef typename iterator_traits<Iter>::reference reference;
-  typedef typename iterator_traits<Iter>::pointer pointer;
-  typedef typename iterator_traits<Iter>::iterator_category iterator_category;
-
-  // TODO modify vector_iterator constructor
-  // vector_iterator() : iterator() {}
-  // vector_iterator(const) {}
-};
-
-// specialization
-template <typename Iter>
-struct vector_iterator<const Iter> {
- public:
-  typedef typename iterator_traits<Iter>::difference_type difference_type;
-  typedef typename iterator_traits<Iter>::value_type value_type;
-  typedef typename iterator_traits<Iter>::pointer pointer;
-  typedef typename iterator_traits<Iter>::reference reference;
-  typedef typename iterator_traits<Iter>::iterator_category iterator_category;
-
-  // TODO vector_iterator
-  // vector_iterator() : iterator() {}
-  // vector_iterator(const) {}
-};
-// !SECTION 0
 
 /** SECTION 1. vector_base
  * @brief RAII pattern for resource management
@@ -81,7 +43,7 @@ class vector_base {
   allocator_type _alloc;
   pointer _begin;    // _m_start (gcc), _begin(llvm)
   pointer _end;      // _m_finish
-  pointer _end_cap;  // _m_end_of_storage?
+  pointer _end_cap;  // _m_end_of_storage
 
   // vector_base constructors
   explicit vector_base(const allocator_type& alloc)
@@ -96,6 +58,8 @@ class vector_base {
     // TODO destroy() & deallocate()
     _alloc.deallocate(_begin, _end_cap - _begin);
   }
+  //  public:
+  //   allocator_type get_allocator() const { return allocator_type(); }
 };
 // !SECTION 1
 
@@ -124,19 +88,22 @@ class vector : public vector_base<T, Allocator> {
   typedef typename _Base::size_type size_type;
   typedef typename _Base::difference_type;
 
-  // random_access_iterator to value_type
   typedef vector_iterator<pointer> iterator;
   typedef vector_iterator<const_pointer> const_iterator;
 
   typedef ft::reverse_iterator<iterator> reverse_iterator;
   typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+
+  typedef typename _Base::_alloc _alloc;
+  typedef typename _Base::_begin _begin;
+  typedef typename _Base::_end _end;
+  typedef typename _Base::_end_cap _end_cap;
   // !SECTION 2-1
 
   // SECTION 2-2. Member Functions
  public:
-  // SECTION 2-2-1. constructor, allocator
-  // NOTE (constructor), (destructor), operator=, assign, get_allocator
-  // vector(void) : _Base(void) {}
+  // SECTION 2-2-1. constructors
+  // NOTE Exception Safety : Strong guarantee <- RAII
   // 1. default
   explicit vector(const allocator_type& alloc = allocator_type())
       : _Base(alloc) {}
@@ -144,29 +111,88 @@ class vector : public vector_base<T, Allocator> {
   explicit vector(size_type count, const value_type& value = value_type(),
                   const allocator_type& alloc = allocator_type())
       : _Base(count, alloc) {
-    // std::uninitailized_fill();
+    std::uninitialized_fill_n(_begin, count, value);
+    _end = _end + count;
   }
   // 3. range
   template <typename InputIt>
   vector(InputIt first, InputIt last,
          const allocator_type& alloc = allocator_type())
-      : _Base(alloc) {}
+      : _Base(alloc) {
+    _end = std::uninitialized_copy(first, last, _begin);
+  }
   // 4. copy
-  vector(const vector& other) {}
+  vector(const vector& other) : _Base(other._alloc, other.size()) {
+    _end = std::uninitialized_copy(other._begin, other._end, _begin);
+    // *this = other;
+    // return *this;
+  }
 
-  ~vector(void);
+  ~vector(void) {}
 
-  vector& operator=(const vector& ref);
+  vector& operator=(const vector& ref) { return *this; }
 
-  void assign(size_type count, const value_type& value);
+  // assign() : fill version
+  void assign(size_type count, const value_type& value) {
+    clear();
+    // CHECK distance ?
+    if (_end_cap - _end < count) {
+      // TODO reallocate
+    } else {
+      std::uninitialized_fill_n(_begin, count, value);
+      _end += count;
+    }
+  }
+
+  // assign() : range version
   template <typename InputIt>
-  void assign(InputIt first, InputIt last);
+  void assign(InputIt first, InputIt last) {
+    clear();
+    // CHECK distance??
+    if (_end_cap - _end < count) {
+      // TODO reallocate
+    } else {
+      _end = std::uninitialized_copy(first, last, _begin);
+    }
+  }
 
-  allocator_type get_allocator() const;
+  allocator_type get_allocator() const { return _alloc; }
+
   // !SECTION 2-2-1
 
   // SECTION 2-2-2. Element access
   // NOTE at, operator[], front, back, data
+
+  /** at()
+   * @brief return vector[pos]
+   *
+   * @param pos position of an element in the container
+   * @return reference
+   */
+  reference at(size_type pos) {
+    if (pos < size()) {
+      return *(_begin + pose);  // CHECK refactoring
+    } else {                    // exception
+      throw std::out_of_range("ft::vector");
+    }
+  }
+
+  const_reference at(size_type pos) const {
+    if (pos < size()) {
+      return *(_begin + pose);  // CHECK refactoring
+    } else {                    // exception
+      throw std::out_of_range("ft::vector");
+    }
+  }
+
+  /** operator[]
+   * @brief
+   *
+   * @param pos
+   * @return reference
+   */
+  reference operator[](size_type pos) {}
+
   // !SECTION 2-2-2
 
   // SECTION 2-2-3. Iterastors
@@ -175,10 +201,32 @@ class vector : public vector_base<T, Allocator> {
 
   // SECTION 2-2-4. Capacity
   // NOTE empty, size, max_size, reserve, capacity
+
+  /** size()
+   * @brief the number of elements
+   *
+   * @return size_type
+   */
+  size_type size() const { return _end - _begin; }
+
   // !SECTION 2-2-4
 
   // SECTION 2-2-5. Modifiers
   // NOTE clear, insert, erase, push_back, pop_back, resize, swap
+
+  // clear()
+  void clear(void) {
+    // erase()
+    _end = _begin;
+  }
+
+  // insert()
+  void insert() {}
+
+  // erase()
+  iterator erase(iterator pos);
+  iterator erase(iterator first, iterator last);
+
   // !SECTION 2-2-5
 };
 // !SECTION 2-2
