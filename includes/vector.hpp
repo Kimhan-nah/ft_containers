@@ -29,22 +29,24 @@ namespace ft {
 template <typename T, typename Allocator = std::allocator<T> >
 class vector_base {
  protected:
+  // member types
   typedef Allocator allocator_type;
   typedef typename allocator_type::reference reference;
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer pointer;
   typedef typename allocator_type::const_pointer const_pointer;
   typedef typename allocator_type::pointer pointer;
-  // std::size_t
   typedef typename allocator_type::size_t size_t;
-  // std::ptrdiff_t
   typedef typename allocator_type::difference_type difference_type;
 
+ protected:
+  // objects
   allocator_type _alloc;
   pointer _begin;    // _m_start (gcc), _begin(llvm)
   pointer _end;      // _m_finish
   pointer _end_cap;  // _m_end_of_storage
 
+ protected:
   // vector_base constructors
   explicit vector_base(const allocator_type& alloc)
       : _alloc(alloc), _begin(NULL), _end(NULL), _end_cap(NULL) {}
@@ -58,8 +60,6 @@ class vector_base {
     // TODO destroy() & deallocate()
     _alloc.deallocate(_begin, _end_cap - _begin);
   }
-  //  public:
-  //   allocator_type get_allocator() const { return allocator_type(); }
 };
 // !SECTION 1
 
@@ -88,16 +88,17 @@ class vector : public vector_base<T, Allocator> {
   typedef typename _Base::size_type size_type;
   typedef typename _Base::difference_type;
 
-  typedef vector_iterator<pointer> iterator;
-  typedef vector_iterator<const_pointer> const_iterator;
-
-  typedef ft::reverse_iterator<iterator> reverse_iterator;
-  typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
-
   typedef typename _Base::_alloc _alloc;
   typedef typename _Base::_begin _begin;
   typedef typename _Base::_end _end;
   typedef typename _Base::_end_cap _end_cap;
+
+  typedef ft::vector_iterator<pointer> iterator;
+  typedef ft::vector_iterator<const_pointer> const_iterator;
+
+  typedef ft::reverse_iterator<iterator> reverse_iterator;
+  typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+
   // !SECTION 2-1
 
   // SECTION 2-2. Member Functions
