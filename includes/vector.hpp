@@ -40,7 +40,7 @@ class vector_base {
   typedef typename allocator_type::difference_type difference_type;
 
  protected:
-  // objects
+  // member objects
   allocator_type _alloc;
   pointer _begin;    // _m_start (gcc), _begin(llvm)
   pointer _end;      // _m_finish
@@ -125,13 +125,12 @@ class vector : public vector_base<T, Allocator> {
   // 4. copy
   vector(const vector& other) : _Base(other._alloc, other.size()) {
     _end = std::uninitialized_copy(other._begin, other._end, _begin);
-    // *this = other;
-    // return *this;
   }
 
   ~vector(void) {}
 
-  vector& operator=(const vector& ref) { return *this; }
+  // TODO modify operator=
+  vector& operator=(const vector& other);
 
   // assign() : fill version
   void assign(size_type count, const value_type& value) {
@@ -164,40 +163,74 @@ class vector : public vector_base<T, Allocator> {
   // SECTION 2-2-2. Element access
   // NOTE at, operator[], front, back, data
 
-  /** at()
-   * @brief return vector[pos]
-   *
-   * @param pos position of an element in the container
-   * @return reference
+  /**
+   * @brief access specified element with bounds checking
+   * @exception bound-checked -> std::out_of_range
+   * @note at != operator[]
    */
   reference at(size_type pos) {
     if (pos < size()) {
-      return *(_begin + pose);  // CHECK refactoring
-    } else {                    // exception
+      return (*this)[pos];
+    } else {  // exception
       throw std::out_of_range("ft::vector");
     }
   }
 
   const_reference at(size_type pos) const {
     if (pos < size()) {
-      return *(_begin + pose);  // CHECK refactoring
-    } else {                    // exception
+      return (*this)[pos];
+    } else {  // exception
       throw std::out_of_range("ft::vector");
     }
   }
 
-  /** operator[]
-   * @brief
-   *
-   * @param pos
-   * @return reference
+  /**
+   * @brief access specified element
+   * @exception NO
+   * @note bound-checked -> undefined behavior
    */
-  reference operator[](size_type pos) {}
+  reference operator[](size_type pos) { return *(_begin + pos); }
+  const_reference operator[](size_type pos) const { return *(_begin + pos); }
+
+  /**
+   * @brief access the first element
+   * @exception NO
+   * @note empty container -> undefined behavior
+   */
+  reference front(void) { return *_begin; }
+  const_reference front(void) const { return *_begin; }
+
+  /**
+   * @brief access the last element
+   * @exception NO
+   * @note empty container -> undefined behavior
+   */
+  reference back(void) { return *(_end - 1); }
+  const_reference back(void) const { return *(_end - 1); }
+
+  /**
+   * @brief direct access to the underlying array
+   * CHECK c++11 ?? (cplusplus)
+   */
+  // pointer data(void); ??
+  value_type* data(void) { return _begin; }
+  const value_type* data(void) const { return _begin; }
 
   // !SECTION 2-2-2
 
   // SECTION 2-2-3. Iterastors
-  // NOTE begin, end, rbegin, rend
+  iterator begin(void) { return iterator(_begin); }
+  const_iterator begin(void) const { return const_iterator(_begin); }
+
+  iterator end(void) { return iterator(_end); }
+  const_iterator end(void) const { return const_iterator(_end); }
+
+  reverse_iterator rbegin(void) {}
+  const_reverse_iterator rbegin(void) const;
+
+  reverse_iterator rend(void);
+  const_reverse_iterator rend(void) const;
+
   // !SECTION 2-2-3
 
   // SECTION 2-2-4. Capacity
