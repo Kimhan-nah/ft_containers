@@ -89,9 +89,6 @@ class reverse_iterator
                           typename iterator_traits<Iter>::difference_type,
                           typename iterator_traits<Iter>::pointer,
                           typename iterator_traits<Iter>::reference> {
- protected:
-  Iter current;
-
  public:
   typedef typename iterator_traits<Iter>::iterator_category iterator_category;
   typedef typename iterator_traits<Iter>::value_type value_type;
@@ -99,35 +96,92 @@ class reverse_iterator
   typedef typename iterator_traits<Iter>::pointer pointer;
   typedef typename iterator_traits<Iter>::reference reference;
 
- public:
   typedef Iter iterator_type;
-  // CHECK traits_type::difference_type ??
 
+ protected:
+  /**
+   * @brief Member objects
+   * @note the underlying iterator of which base() returns a copy
+   */
+  iterator_type _current;
+
+  // SECTION 2-1. Member Functions
  public:
-  reverse_iterator(void) {}
-  explicit reverse_iterator(iterator_type it) : current(it) {}
-  // CHECK GNU, but cpp reference.....
-  // explicit reverse_iterator(const iterator_type it) : current(it.u) {}
-
+  // SECTION 2-1-1. (constructors)
+  /* NOTE Exception Safety
+   *	Provides the same level of guarantee as the proper constructor of the
+   * 	base iterator
+   */
+  // 1. default
+  reverse_iterator(void) : _current(void) {}
+  // 2. initialization
+  explicit reverse_iterator(iterator_type it) : _current(it) {}
+  // 3. copy / type-cast constructor
   template <typename _Iter>
-  reverse_iterator(const reverse_iterator<_Iter> &rev_it) : current() {}
+  reverse_iterator(const reverse_iterator<_Iter> &rev_it)
+      : _current(rev_it.base()) {}
 
-  // CHECK operator=
-  // template <typename Iter_>
-  // reverse_iterator &operator=(const reverse_iterator<It> &it);
+  // CHECK only cppreference.. there are no operaotr= in cplusplus and gcc code.
+  template <typename _Iter>
+  reverse_iterator &operator=(const reverse_iterator<_Iter> &other)
+      : _current(other.base()) {
+    return *this;
+  }
 
-  iterator_type base() const;
+  /**
+   * @brief accesses the underlying iterator
+   * @exception same level of guarantee as the copy constructor of the base
+   * iterator
+   */
+  iterator_type base(void) const { return _current; }
 
-  reference operator*() const;
-  pointer operator->() const;
+  /**
+   * @brief accesses the pointed-to element
+   * @return the element previous to current
+   */
+  reference operator*(void) const {
+    iterator_type tmp = current;
+    return *--tmp;
+  }
 
-  // CHECK operator[] return reference ?
-  reference operator[](difference_type n) const;
+  /**
+   * @brief accesses the pointed-to element
+   * @return the element previous to current
+   */
+  pointer operator->(void) const { return &(operator*()); }
 
-  reverse_iterator &operator++();
-  reverse_iterator &operator--();
-  reverse_iterator operator++(int);
-  reverse_iterator operator--(int);
+  /**
+   * @brief accesses an element by index
+   * @exception NO
+   * @note element doesn't exist -> undefined behavior
+   */
+  reference operator[](difference_type n) const {
+    // return *(_current + n - 1); // right??
+    return *(*this + n);  // operator+(n);
+  }
+
+  // advances or decrements the iterator
+  reverse_iterator &operator++(void) {
+    --_current;
+    return *this;
+  }
+
+  reverse_iterator operator++(int) {
+    reverse_iterator tmp = *this;
+    --_current;
+    return tmp;
+  }
+
+  reverse_iterator &operator--(void) {
+    ++_current;
+    return *this;
+  }
+
+  reverse_iterator operator--(int) {
+    reverse_iterator tmp = *this;
+    ++_current;
+    return tmp;
+  }
   reverse_iterator operator+(difference_type n) const;
   reverse_iterator operator-(difference_type n) const;
   reverse_iterator &operator+=(difference_type n);
