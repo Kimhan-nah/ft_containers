@@ -225,41 +225,118 @@ class vector : public vector_base<T, Allocator> {
   iterator end(void) { return iterator(_end); }
   const_iterator end(void) const { return const_iterator(_end); }
 
-  reverse_iterator rbegin(void) {}
-  const_reverse_iterator rbegin(void) const;
+  reverse_iterator rbegin(void) { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin(void) const {
+    return const_reverse_iterator(end());
+  }
 
-  reverse_iterator rend(void);
-  const_reverse_iterator rend(void) const;
+  reverse_iterator rend(void) { return reverse_iterator(begin()); }
+  const_reverse_iterator rend(void) const {
+    return const_reverse_iterator(begin());
+  }
 
   // !SECTION 2-2-3
 
   // SECTION 2-2-4. Capacity
   // NOTE empty, size, max_size, reserve, capacity
-
-  /** size()
-   * @brief the number of elements
-   *
-   * @return size_type
+  /**
+   * @brief checks whether the container is empty
+   * @exception No-Throw guarantee
    */
-  size_type size() const { return _end - _begin; }
+  bool empty(void) const {
+    // return size() == 0;
+    return _begin == _end;
+  }
+
+  /**
+   * @brief returns the number of elements
+   * @exception No-Throw guarantee
+   */
+  size_type size(void) const { return _end - _begin; }
+
+  /**
+   * @brief returns the maximum possible number of elements
+   * @exception No-Throw guarantee
+   * CHECK allocator.max_size() throw ??
+   */
+  size_type max_size(void) const {
+    return _alloc.max_size();
+    // return size_type(-1) / sizeof(value_type); }
+  }
+  /**
+   * @brief reserves storage
+   * @exception STRONG
+   * @exception BASIC
+   */
+  void reserve(size_type new_cap) {
+    if (new_cap > capacity()) {
+      // reallocate
+    }
+  }
+
+  size_type capacity(void) const { return _end_cap - _begin; }
 
   // !SECTION 2-2-4
 
   // SECTION 2-2-5. Modifiers
   // NOTE clear, insert, erase, push_back, pop_back, resize, swap
 
-  // clear()
-  void clear(void) {
-    // erase()
-    _end = _begin;
+  /**
+   * @brief clears the contents
+   * @note erases all elements from the container
+   */
+  void clear(void) {}
+
+  /**
+   * @brief inserts elements
+   *
+   */
+  void insert(void) {}
+
+  /**
+   * @brief erases elements
+   */
+  iterator erase(iterator pos) {
+    if (*pos == _end) {
+      return end();
+    }
+    _alloc.destroy(*pos);
+    // relocation
+  }
+  iterator erase(iterator first, iterator last) {
+    if (*last == end()) {
+      // prior to removal
+      // updated end() iterator is returned
+    }
   }
 
-  // insert()
-  void insert() {}
+  /**
+   * @brief adds an element to the end
+   *
+   * @param value
+   */
+  void push_back(const value_type& value);
 
-  // erase()
-  iterator erase(iterator pos);
-  iterator erase(iterator first, iterator last);
+  /**
+   * @brief removes the last element
+   *
+   */
+  void pop_back(void);
+
+  /**
+   * @brief changes the number of elements stored
+   *
+   * @param count
+   * @param value
+   */
+  void resize(size_type count, value_type value = value_type());
+
+  /**
+   * @brief swaps the contents
+   *
+   * @param other
+   */
+  void swap(vector& other);
 
   // !SECTION 2-2-5
 };
@@ -269,13 +346,6 @@ class vector : public vector_base<T, Allocator> {
 // SECTION 3. Non-member functions
 /** SECTION 3-1. Relational operators
  * @brief Compares the contents of two vectors
- *
- * @tparam T
- * @tparam Alloc
- * @param lhs vector of left-hand side of the operator whose content to compare
- * @param rhs vector of right-hand side of the operator whose content to compare
- * @return true
- * @return false
  */
 template <typename T, typename Alloc>
 bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
