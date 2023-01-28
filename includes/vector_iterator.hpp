@@ -35,29 +35,29 @@ struct vector_iterator {
       typename ft::iterator_traits<Iter>::iterator_category iterator_category;
 
  protected:
-  iterator_type _current;
+  iterator_type current;
 
  public:
   // SECTION constructor
-  vector_iterator(void) : _current(iterator_type()) {}
+  vector_iterator(void) : current(iterator_type()) {}
 
-  explicit vector_iterator(const iterator_type& other) : _current(other) {}
+  explicit vector_iterator(const iterator_type& other) : current(other) {}
 
   // Allow iterator to const_iterator conversion
   // CHECK copy constructor?
   template <typename _Iter>
   explicit vector_iterator(const vector_iterator<_Iter>& other)
-      : _current(other.base()) {}
+      : current(other.base()) {}
 
   // base()
-  const iterator_type& base() const { return _current; }
+  const iterator_type& base() const { return current; }
 
   ~vector_iterator(void) {}
 
   // CHECK operator=
   template <typename _Iter>
   vector_iterator& operator=(const vector_iterator<_Iter>& other)
-      : _current(other.base()) {
+      : current(other.base()) {
     return *this;
   }
 
@@ -65,40 +65,40 @@ struct vector_iterator {
 
   // SECTION operators
   // operator *, ->, [], ++, --, +, -, +=, -=
-  reference operator*(void) const { return *_current; }
-  pointer operator->(void) const { return &_current; }
-  reference operator[](difference_type n) const { return _current[n]; }
+  reference operator*(void) const { return *current; }
+  pointer operator->(void) const { return &current; }
+  reference operator[](difference_type n) const { return current[n]; }
 
   // ++iter
   vector_iterator& operator++(void) {
-    ++_current;
+    ++current;
     return *this;
   }
   // iter++
-  vector_iterator operator++(int) { return vector_iterator(_current++); }
+  vector_iterator operator++(int) { return vector_iterator(current++); }
 
   // --iter
   vector_iterator& operator--(void) {
-    --_current;
+    --current;
     return *this;
   }
   // iter--
-  vector_iterator operator--(int) { return vector_iterator(_current--); }
+  vector_iterator operator--(int) { return vector_iterator(current--); }
 
   // iter + n, iter - n
   vector_iterator operator+(const difference_type& n) const {
-    return vector_iterator(_current + n);
+    return vector_iterator(current + n);
   }
   vector_iterator operator-(const difference_type& n) const {
-    return vector_iterator(_current - n);
+    return vector_iterator(current - n);
   }
 
   vector_iterator& operator+=(const difference_type& n) {
-    _current += n;
+    current += n;
     return *this;
   }
   vector_iterator& operator-=(const difference_type& n) {
-    _current -= n;
+    current -= n;
     return *this;
   }
   // !SECTION
