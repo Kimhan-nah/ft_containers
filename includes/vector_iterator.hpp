@@ -19,9 +19,8 @@ namespace ft {
 /** SECTION 0. vector_iterator
  * @brief random_access_iterator (normal_iterator in GNU)
  *
- * @tparam Iter	- the iterator type to retrieve properties for
+ * @tparam Iter - ft::vector::pointer(T*)
  *
- * Iterator invalidation : swap, clear, operator=, assign, earse ...
  */
 template <typename Iter>
 struct vector_iterator {
@@ -50,7 +49,8 @@ struct vector_iterator {
       : current(other.base()) {}
 
   // base()
-  const iterator_type& base() const { return current; }
+  // CHECK return const iterator_type&?? (reverse_iterator base)
+  const iterator_type& base(void) const { return current; }
 
   ~vector_iterator(void) {}
 
@@ -178,8 +178,7 @@ vector_iterator<Iter> operator-(
  */
 template <typename Iter>
 typename vector_iterator<Iter>::difference_type operator-(
-    const typename vector_iterator<Iter>::difference_type& lhs,
-    const typename vector_iterator<Iter>::difference_type& rhs) {
+    const vector_iterator<Iter>& lhs, const vector_iterator<Iter>& rhs) {
   return lhs.base() - rhs.base();
 }
 // !SECTION

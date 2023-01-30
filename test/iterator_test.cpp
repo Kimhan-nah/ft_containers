@@ -1,50 +1,54 @@
+// erasing from vector
 #include <iostream>
-#include <iterator>
 #include <vector>
 
-int main(void) {
+int main() {
   std::vector<int> myvector;
-  for (int i = 0; i < 10; i++) myvector.push_back(i + 1);
+  std::vector<int>::iterator iter;
 
-  std::vector<int>::iterator from(myvector.begin());
-  std::vector<int>::iterator until(myvector.end());
+  // set some values (from 1 to 10)
+  for (int i = 1; i <= 10; i++) myvector.push_back(i);
 
-  std::reverse_iterator<std::vector<int>::iterator> rev_until(from);
-  std::reverse_iterator<std::vector<int>::iterator> rev_from(until);
+  // erase the 6th element
+  iter = myvector.erase(myvector.begin() + 5);  // 1 2 3 4 5 7 8 9 10
+  std::cout << "myvector contains:";
+  for (unsigned i = 0; i < myvector.size(); ++i)
+    std::cout << ' ' << myvector[i];
+  std::cout << '\n';
+  std::cout << "return iterator : " << *iter << "\n==========\n" << std::endl;
 
-  // std::cout << "myvector : ";
-  // while (from != until) {
-  //   std::cout << ' ' << *from;
-  //   from++;
-  // }
-  std::cout << *from << std::endl;
-  --from;
-  std::cout << *from << std::endl;
+  // erase the first 3 elements:
+  iter = myvector.erase(myvector.begin(), myvector.begin() + 3);  //
 
-  std::cout << std::endl;
-  std::cout << std::endl;
+  std::cout << "myvector contains:";
+  for (unsigned i = 0; i < myvector.size(); ++i)
+    std::cout << ' ' << myvector[i];
+  std::cout << '\n';
+  std::cout << "return iterator : " << *iter << "\n==========\n" << std::endl;
 
-  // std::cout << "--from : " << *--from << std::endl;
-  // std::cout << "--from : " << *--from << std::endl;
+  // erase the last element -> segmentation fault!
+  iter = myvector.erase(myvector.begin() + 2, myvector.end());
 
-  // std::cout << "reverse myvector : ";
-  // while (rev_from != rev_until) {
-  //   std::cout << ' ' << *rev_from++;
-  // }
+  std::cout << "myvector contains:";
+  for (unsigned i = 0; i < myvector.size(); ++i)
+    std::cout << ' ' << myvector[i];
+  std::cout << '\n';
+  std::cout << "return iterator : " << *iter << "\n==========\n" << std::endl;
 
-  // std::cout << std::endl;
+  // insert return test
+  iter = myvector.insert(myvector.end() + 1, 42);
+  std::cout << "insert return : " << *iter << std::endl;
+  std::cout << "myvector contains:";
+  for (unsigned i = 0; i < myvector.size(); ++i)
+    std::cout << ' ' << myvector[i];
+  std::cout << "\n====\n\n";
 
-  // from -= 3;
-  // std::reverse_iterator<std::vector<int>::iterator> rev(from);
-
-  // std::cout << "from : " << *from << std::endl;
-  // std::cout << "rev : " << *rev << std::endl;
-  // std::cout << std::endl;
-
-  // rev++;
-  // std::cout << "from : " << *from << std::endl;
-  // std::cout << "rev : " << *rev << std::endl;
-  // std::cout << std::endl;
+  // iter = myvector.insert(myvector.begin(), 2, 4242);
+  // std::cout << "insert return : " << *iter << std::endl;
+  // std::cout << "myvector contains:";
+  // for (unsigned i = 0; i < myvector.size(); ++i)
+  //   std::cout << ' ' << myvector[i];
+  // std::cout << "\n====\n\n";
 
   return 0;
 }
