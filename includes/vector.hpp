@@ -72,7 +72,6 @@ class vector_base {
  * allocation model
  */
 template <typename T, typename Allocator = std::allocator<T> >
-// CHECK private || protected || public
 class vector : public vector_base<T, Allocator> {
  private:
   typedef vector_base<T, Allocator> _Base;
@@ -136,7 +135,12 @@ class vector : public vector_base<T, Allocator> {
   ~vector(void) {}
 
   // TODO modify operator=
-  vector& operator=(const vector& other);
+  vector& operator=(const vector& other) {
+    // use assign();
+    assign(other.begin(), other.end());
+
+    return *this;
+  }
 
   // assign() : fill version
   void assign(size_type count, const value_type& value) {
@@ -247,10 +251,7 @@ class vector : public vector_base<T, Allocator> {
    * @brief checks whether the container is empty
    * @exception No-Throw guarantee
    */
-  bool empty(void) const {
-    // return size() == 0;
-    return _begin == _end;
-  }
+  bool empty(void) const { return _begin == _end; }
 
   /**
    * @brief returns the number of elements
@@ -273,11 +274,11 @@ class vector : public vector_base<T, Allocator> {
    * @exception BASIC
    */
   void reserve(size_type new_cap) {
-    if (new_cap > capacity()) {  // reallocate
+    if (new_cap > capacity()) {  // reallocate -> STRONG
       vector tmp;
 
-      tmp._begin = _alloc.allocate(new_cap);
-      std::uninitialized_copy(begin(), end(), tmp.begin());
+      tmp._begin = _alloc.allocate(new_cap);  // throw bad_alloc exception
+      tmp._end = std::uninitialized_copy(begin(), end(), tmp.begin());
       swap(tmp);
     }
   }
