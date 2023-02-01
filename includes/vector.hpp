@@ -17,6 +17,7 @@
 #include <vector>
 
 // ft::reverse_iterator
+#include "algorithm.hpp"
 #include "iterator.hpp"
 #include "vector_iterator.hpp"
 
@@ -55,12 +56,7 @@ class vector_base {
         _begin(_alloc.allocator(count)),  // allocate & return pointer
         _end(_begin),
         _end_cap(_begin + count) {}
-  ~vector_base(void) {
-    for (pointer p = _begin; p < _end; p++) {
-      _alloc.destroy(p);
-    }
-    _alloc.deallocate(_begin, _end_cap - _begin);
-  }
+  ~vector_base(void) { _alloc.deallocate(_begin, _end_cap - _begin); }
 };
 // !SECTION 1
 
@@ -132,36 +128,32 @@ class vector : public vector_base<T, Allocator> {
     _end = std::uninitialized_copy(other._begin, other._end, _begin);
   }
 
-  ~vector(void) {}
+  ~vector(void) {
+    for (pointer p = _begin; p < _end; p++) {
+      _alloc.destroy(p);
+    }
+  }
 
-  // TODO modify operator=
   vector& operator=(const vector& other) {
-    // use assign();
     assign(other.begin(), other.end());
 
     return *this;
   }
 
   // assign() : fill version
-  void assign(size_type count, const value_type& value) {
+  // TODO Add enable_if???
+  void assign(size_type n, const value_type& value) {
     clear();
-    if (_end_cap - _end < count) {
-      // TODO reallocate
-    } else {
-      std::uninitialized_fill_n(_begin, count, value);
-      _end += count;
-    }
+    for (size_type i = 0; i < n; i++) push_back(value);  // included reallocate
   }
 
   // assign() : range version
   template <typename InputIt>
   void assign(InputIt first, InputIt last) {
+    size_type n = last - first;
+
     clear();
-    if (_end_cap - _end < count) {
-      // TODO reallocate
-    } else {
-      _end = std::uninitialized_copy(first, last, _begin);
-    }
+    for (; first != last; first++) push_back(*first);  // included reallocate
   }
 
   allocator_type get_allocator() const { return _alloc; }
@@ -277,10 +269,12 @@ class vector : public vector_base<T, Allocator> {
     if (new_cap > capacity()) {  // reallocate -> STRONG
       vector tmp;
 
-      tmp._begin = _alloc.allocate(new_cap);  // throw bad_alloc exception
+      tmp._begin = _alloc.allocate(new_cap);
       tmp._end = std::uninitialized_copy(begin(), end(), tmp.begin());
+      tmp._end_cap = tmp._begin + new_cap;
       swap(tmp);
     }
+    // otherwise, do nothing
   }
 
   size_type capacity(void) const { return _end_cap - _begin; }
@@ -294,7 +288,7 @@ class vector : public vector_base<T, Allocator> {
    * @brief clears the contents
    * @note erases all elements from the container
    */
-  void clear(void) { erase(begin(), end()); }
+  void clear(void) { _end = erase(begin(), end()); }
 
   /**
    * @brief inserts elements
@@ -304,18 +298,18 @@ class vector : public vector_base<T, Allocator> {
     pointer p = _begin + (pos - begin());
 
     if (size() + 1 > capacity()) {  // _end == _end_cap
-                                    // reallocate
+      // reallocate
       vector tmp;
 
       tmp._begin = _alloc.allocate(capacity() * 2);
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-      _alloc.construct(tmp._end, val);
+      // _alloc.construct(tmp._end, val);
       tmp._end = std::uninitialized_copy(p + 1, _end,
                                          tmp._end + 1);  // [p + 1, _end)
       swap(tmp);
     } else {
       // construct at end
-      _alloc.construct(_end, *(_end - 1));
+      std::uninitialized_copy(_end - 1, _end, _end);
 
       // relocate
       std::copy_backward(p, _end - 1, _end - 1);
@@ -324,9 +318,10 @@ class vector : public vector_base<T, Allocator> {
       *p = val;
 
       // update _end
-      ++_end
+      ++_end;
+
+      return iterator(p);
     }
-    return iterator(p);
   }
 
   // 2. fill
@@ -335,27 +330,19 @@ class vector : public vector_base<T, Allocator> {
 
     if (size() + n > capacity()) {
       // reallocate
-      // CHECK Consider the new_size
       size_type new_size =
           (size() + n > capacity() * 2) ? size() + n : capacity() * 2;
       vector tmp;
 
       tmp._begin = _alloc.allocate(new_size);
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-
-      for (size_type i = 0; i < n; i++) {  // [p, p + n)
-        _alloc.construct(tmp._end + i, val);
-      }
-
       tmp._end = std::uninitialized_copy(p + n, _end,
                                          tmp._end + n);  // [p + n, _end)
       swap(tmp);
 
     } else {
       // constructs at end
-      for (size_type i = 0; i < n; i++) {
-        _alloc.construct(_end + i, *(_end - n + i));
-      }
+      std::uninitialized_copy(_end - n, _end, _end);
 
       // relocate [p, _end - n)
       std::copy_backward(p, _end - n, _end - 1);
@@ -393,9 +380,7 @@ class vector : public vector_base<T, Allocator> {
       swap(tmp);
     } else {
       // constructs at end
-      for (size_type i = 0; i < n; i++) {
-        _alloc.construct(_end + i, *(_end - n + i));
-      }
+      std::uninitialized_copy(_end - n, _end, _end);
 
       // relocate [p, _end - n)
       std::copy_backward(p, _end - n, _end - 1);
@@ -426,6 +411,7 @@ class vector : public vector_base<T, Allocator> {
 
     if (_p != _end - 1) {
       _alloc.destroy(_p);
+      // relocate
       std::copy(pos + 1, end(), pos);
       --_end;
     }
@@ -442,6 +428,7 @@ class vector : public vector_base<T, Allocator> {
       for (pointer _p = _first; _p < _last; _p++) {
         _alloc.destroy(_p);
       }
+      // relocate
       std::copy(last, end(), first);
       _end -= n;
     }
@@ -452,44 +439,52 @@ class vector : public vector_base<T, Allocator> {
    * @brief adds an element to the end
    */
   void push_back(const value_type& value) {
-    if (_end != _end_cap) {
-      _alloc.construct(_end, value);
-      ++_end;
-    } else {
-      // TODO reallocate
+    if (size() + 1 > capacity()) {
+      if (capacity() > 0)
+        reserve(capacity() * 2);
+      else
+        reserve(2);
     }
+    // construct at end
+    _alloc.construct(_end, value);
+    ++_end;
   }
 
   /**
    * @brief removes the last element
    */
-  void pop_back(void) {
-    erase(_end);
-    --_end;
-  }
+  void pop_back(void) { _end = erase(_end); }
 
   /*
    * @brief changes the number of elements stored
    */
   void resize(size_type new_size, value_type value = value_type()) {
     if (new_size < size()) {
-      erase(begin() + new_size, end());
+      _end = erase(begin() + new_size, end());
     } else {
-      // expand by inserting
-      insert(end(), new_size - size(), value);
+      insert(_end, size() - new_size, val);  // included reallocate
     }
   }
 
   /**
    * @brief swaps the contents
    */
-  void swap(vector& other) {}
+  void swap(vector& other) {
+    _swap(_begin, other._begin);
+    _swap(_end, other._end);
+    _swap(_end_cap, other._end_cap);
+  }
 
   // !SECTION 2-2-5
   // !SECTION 2-2
 
   // SECTION 2-3. Private Member Functions
  private:
+  void _swap(T& a, T& b) {
+    T tmp(a);
+    a = b;
+    b = tmp;
+  }
 };
 // !SECTION 2
 
@@ -498,27 +493,45 @@ class vector : public vector_base<T, Allocator> {
  * @brief Compares the contents of two vectors
  */
 template <typename T, typename Alloc>
-bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {}
+bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
 
 template <typename T, typename Alloc>
-bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  return !(lhs == rhs);
+}
 
 template <typename T, typename Alloc>
-bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                     rhs.end());
+}
 
 template <typename T, typename Alloc>
-bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  return !(lhs < rhs);
+}
 
 template <typename T, typename Alloc>
-bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  // return rhs < lhs;
+  return ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(),
+                                     lhs.end());
+}
 
 template <typename T, typename Alloc>
-bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+  return !(lhs > rhs);
+}
+
 // !SECTION 3-1
 
 // SECTION 3-2. swap function
 template <typename T, typename Alloc>
-void swap(vector<T, Alloc>& lhs, ft::vector<T, Alloc>& rhs);
+void swap(ft::vector<T, Alloc>& lhs, ft::vector<T, Alloc>& rhs) {
+  lhs.swap(rhs);
+}
 // !SECTION 3-2
 
 // !SECTION 3
