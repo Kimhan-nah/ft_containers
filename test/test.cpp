@@ -12,6 +12,7 @@ class Base {
     asset = a;
     test = 42;
   }
+  ~Base() { cout << "~Base Destructor called" << endl; }
   void showBase() { cout << asset << endl; }
 };
 
@@ -24,6 +25,7 @@ class Derived : public Base<T> {
   // Derived(int a, int b) : Base<T>::Base(a) { test = b; }
   Derived(int a, int b) : Base<T>(a) { test = b; }
   // Derived(int a, int b) : Base::Base(a) { test = b; }
+  ~Derived() { cout << "~Derived called" << endl; }
 
   void showDerived() {
     cout << "Base::asset : " << Base<T>::asset << endl;
@@ -43,9 +45,5 @@ class Derived : public Base<T> {
 int main() {
   Derived<int> D(10, 50);
 
-  D.showBase();
-  D.showDerived();
-  // cout << D.asset << endl;
-  D.test_function();
   return 0;
 }
