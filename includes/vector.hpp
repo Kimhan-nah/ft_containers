@@ -19,6 +19,7 @@
 // ft::reverse_iterator
 #include "algorithm.hpp"
 #include "iterator.hpp"
+#include "type_traits.hpp"
 #include "vector_iterator.hpp"
 
 namespace ft {
@@ -89,11 +90,6 @@ class vector : public vector_base<T, Allocator> {
   typedef typename _Base::_end _end;
   typedef typename _Base::_end_cap _end_cap;
 
-  // TODO using test
-  // using _Base::_alloc;
-  // using _Base::_end;
-  // using _Base::_end_cap;
-
   // vector_iterator == pointer == T*
   typedef ft::vector_iterator<pointer> iterator;
   typedef ft::vector_iterator<const_pointer> const_iterator;
@@ -117,9 +113,11 @@ class vector : public vector_base<T, Allocator> {
     _end = _end + count;
   }
   // 3. range
-  template <typename InputIt>
-  vector(InputIt first, InputIt last,
-         const allocator_type& alloc = allocator_type())
+  template <typename InputIter>
+  vector(InputIter first, InputIter last,
+         const allocator_type& alloc = allocator_type(),
+         typename ft::enable_if<!ft::is_integral<InputIter>::value,
+                                InputIter>::type)
       : _Base(alloc) {
     _end = std::uninitialized_copy(first, last, _begin);
   }
@@ -141,15 +139,16 @@ class vector : public vector_base<T, Allocator> {
   }
 
   // assign() : fill version
-  // TODO Add enable_if???
   void assign(size_type n, const value_type& value) {
     clear();
     for (size_type i = 0; i < n; i++) push_back(value);  // included reallocate
   }
 
   // assign() : range version
-  template <typename InputIt>
-  void assign(InputIt first, InputIt last) {
+  template <typename InputIter>
+  void assign(InputIter first, InputIter last,
+              typename ft::enable_if<!ft::is_integral<InputIter>::value,
+                                     InputIter>::type) {
     size_type n = last - first;
 
     clear();
@@ -358,7 +357,9 @@ class vector : public vector_base<T, Allocator> {
 
   // 3. range
   template <typename InputIter>
-  interator insert(const_iterator pos, InputIter first, InputIter last) {
+  interator insert(const_iterator pos, InputIter first, InputIter last,
+                   typename ft::enable_if<!ft::is_integral<InputIter>::value,
+                                          InputIter>::type) {
     pointer p = _begin + (pos - begin());
     difference_type n = last - first;
 
