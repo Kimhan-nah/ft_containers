@@ -37,8 +37,7 @@ class vector_base {
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer pointer;
   typedef typename allocator_type::const_pointer const_pointer;
-  typedef typename allocator_type::pointer pointer;
-  typedef typename allocator_type::size_t size_t;
+  typedef typename allocator_type::size_type size_type;
   typedef typename allocator_type::difference_type difference_type;
 
  protected:
@@ -85,10 +84,15 @@ class vector : public vector_base<T, Allocator> {
   typedef typename _Base::size_type size_type;
   typedef typename _Base::difference_type difference_type;
 
-  // 이거 없으면  this->_alloc 해야됨 ㅎㅎ
-  typedef typename _Base::_alloc _alloc;
-  typedef typename _Base::_end _end;
-  typedef typename _Base::_end_cap _end_cap;
+  // typedef typename _Base::_alloc _alloc;
+  // typedef typename _Base::_begin _begin;
+  // typedef typename _Base::_end _end;
+  // typedef typename _Base::_end_cap _end_cap;
+
+  using _Base::_alloc;
+  using _Base::_begin;
+  using _Base::_end;
+  using _Base::_end_cap;
 
   // vector_iterator == pointer == T*
   typedef ft::vector_iterator<pointer> iterator;
@@ -117,7 +121,7 @@ class vector : public vector_base<T, Allocator> {
   vector(InputIter first, InputIter last,
          const allocator_type& alloc = allocator_type(),
          typename ft::enable_if<!ft::is_integral<InputIter>::value,
-                                InputIter>::type)
+                                InputIter>::type* = NULL)
       : _Base(alloc) {
     _end = std::uninitialized_copy(first, last, _begin);
   }
@@ -148,7 +152,7 @@ class vector : public vector_base<T, Allocator> {
   template <typename InputIter>
   void assign(InputIter first, InputIter last,
               typename ft::enable_if<!ft::is_integral<InputIter>::value,
-                                     InputIter>::type) {
+                                     InputIter>::type* = NULL) {
     size_type n = last - first;
 
     clear();
@@ -357,9 +361,9 @@ class vector : public vector_base<T, Allocator> {
 
   // 3. range
   template <typename InputIter>
-  interator insert(const_iterator pos, InputIter first, InputIter last,
-                   typename ft::enable_if<!ft::is_integral<InputIter>::value,
-                                          InputIter>::type) {
+  iterator insert(const_iterator pos, InputIter first, InputIter last,
+                  typename ft::enable_if<!ft::is_integral<InputIter>::value,
+                                         InputIter>::type* = NULL) {
     pointer p = _begin + (pos - begin());
     difference_type n = last - first;
 
@@ -387,7 +391,7 @@ class vector : public vector_base<T, Allocator> {
       std::copy_backward(p, _end - n, _end - 1);
 
       // insert
-      std::fill_n(p, n, val);
+      std::copy(first, last, p);
 
       // update _end
       _end += n;
@@ -424,16 +428,17 @@ class vector : public vector_base<T, Allocator> {
     difference_type n = last - first;
     pointer _first = _begin + (first - begin());
     pointer _last = _begin + (last - begin());
+    pointer _p = _first;
 
     if (first != last) {
-      for (pointer _p = _first; _p < _last; _p++) {
+      for (; _p < _last; _p++) {
         _alloc.destroy(_p);
       }
       // relocate
       std::copy(last, end(), first);
       _end -= n;
     }
-    return iteraotr(p);
+    return iterator(_p);
   }
 
   /**
@@ -463,7 +468,7 @@ class vector : public vector_base<T, Allocator> {
     if (new_size < size()) {
       _end = erase(begin() + new_size, end());
     } else {
-      insert(_end, size() - new_size, val);  // included reallocate
+      insert(_end, size() - new_size, value);  // included reallocate
     }
   }
 

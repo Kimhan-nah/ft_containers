@@ -114,7 +114,7 @@ class reverse_iterator
    * 	base iterator
    */
   // 1. default
-  reverse_iterator(void) : current(void) {}
+  reverse_iterator(void) : current() {}
   // 2. initialization
   explicit reverse_iterator(iterator_type it) : current(it) {}
   // 3. copy / type-cast constructor
@@ -125,8 +125,9 @@ class reverse_iterator
   // CHECK only cppreference.. there are no operaotr= in cplusplus and gcc code.
   // reverse_iterator tmp = *this;
   template <typename _Iter>
-  reverse_iterator &operator=(const reverse_iterator<_Iter> &other)
-      : current(other.base()) {
+  reverse_iterator &operator=(const reverse_iterator<_Iter> &other) {
+    // current(other.base());
+    current = other.base();
     return *this;
   }
 
@@ -256,7 +257,7 @@ template <class Iter>
 reverse_iterator<Iter> operator+(
     typename reverse_iterator<Iter>::difference_type n,
     const reverse_iterator<Iter> &rev_it) {
-  return reverse_iterator(rev_it.base() - n);
+  return reverse_iterator<Iter>(rev_it.base() - n);
 }
 
 // operator-
