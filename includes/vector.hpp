@@ -302,28 +302,28 @@ class vector : protected vector_base<T, Allocator> {
       // reallocate
       vector tmp;
 
-      size_type new_size = (capacity() * 2 == 0) ? 2 : capacity() * 2;
+      size_type new_size = _get_new_capacity(size() + 1);
       tmp._begin = _alloc.allocate(new_size);
-      tmp._end_cap = _begin + new_size;
+      tmp._end_cap = tmp._begin + new_size;
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-      // std::cout << "end - begin :  " << tmp._end - tmp._begin << '\n';
       std::uninitialized_fill_n(tmp._end, 1, val);  // insert single element
       ++tmp._end;
       tmp._end = std::uninitialized_copy(p, _end,
                                          tmp._end);  // [p, _end)
       swap(tmp);
+    } else if (p == _end) {
+      _construct_at_end(1, val);
     } else {
-      // construct at end
-      std::uninitialized_copy(_end - 1, _end, _end);
+      pointer old_end = _end;
 
-      // relocate
-      std::copy_backward(pos, end() - 1, end() - 1);
+      _construct_at_end(1, val);
+      std::copy_backward(p, old_end, _end);
+      std::fill_n(p, 1, val);
 
-      // insert
-      *pos = val;
-
-      // update _end
-      ++_end;
+      // std::uninitialized_copy(_end - 1, _end, _end);
+      // std::copy_backward(pos, end() - 1, end() - 1);
+      // *pos = val;
+      // ++_end;
     }
     return iterator(pos);
   }
@@ -334,39 +334,23 @@ class vector : protected vector_base<T, Allocator> {
 
     if (size() + n > capacity()) {
       // reallocate
-      size_type new_size =
-          (size() + n > capacity() * 2) ? size() + n : capacity() * 2;
+      size_type new_size = _get_new_capacity(size() + n);
       vector tmp;
 
       tmp._begin = _alloc.allocate(new_size);
+      tmp._end_cap = tmp._begin + new_size;
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-
       tmp._end =
           std::uninitialized_fill_n(tmp._end, n, val);  // insert elements
-
       tmp._end = std::uninitialized_copy(p, _end,
                                          tmp._end);  // [p, _end)
       swap(tmp);
-
     } else {
-      // CHECK n > size() ???
-      if (n > size()) {
-        // constructs at end
-        // std::cout << "_end : " << _end - n << std::endl;
-        std::cout << "_end - n : " << *(_end - n) << std::endl;
-        std::uninitialized_copy(_end - n, _end, _end);
-        // std::uninitialized_copy(p, _end, p + n);
+      pointer old_end = _end;
 
-        // relocate [p, _end - n)
-        std::copy_backward(p, _end - n, _end - 1);
-
-        // insert
-        std::fill_n(p, n, val);
-
-        // update _end
-        _end += n;
-      } else {
-      }
+      _construct_at_end(n, val);
+      std::copy_backward(p, old_end, _end);
+      std::fill_n(p, n, val);
     }
     return iterator(p);
   }
@@ -377,37 +361,29 @@ class vector : protected vector_base<T, Allocator> {
                   typename ft::enable_if<!ft::is_integral<InputIter>::value,
                                          InputIter>::type* = NULL) {
     pointer p = _begin + (pos - begin());
-    // pointer p = _begin + std::distance(pos, begin());
     difference_type n = std::distance(first, last);
 
     if (size() + n > capacity()) {
-      // reallocate
-      // CHECK Consider the new_size
-      size_type new_size =
-          (size() + n > capacity() * 2) ? size() + n : capacity() * 2;
+      size_type new_size = _get_new_capacity(size() + n);
       vector tmp;
 
       tmp._begin = _alloc.allocate(new_size);
+      tmp._end_cap = tmp._begin + new_size;
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-
-      // copy [first, last)
       tmp._end = std::uninitialized_copy(first, last, tmp._end);
-
       tmp._end = std::uninitialized_copy(p, _end,
                                          tmp._end);  // [p, _end)
       swap(tmp);
     } else {
-      // constructs at end
-      std::uninitialized_copy(_end - n, _end, _end);
+      pointer old_end = _end;
 
-      // relocate [p, _end - n)
-      std::copy_backward(p, _end - n, _end - 1);
-
-      // insert
+      _construct_at_end(n, *(_end - 1));
+      std::copy_backward(p, old_end, _end);
       std::copy(first, last, p);
-
-      // update _end
-      _end += n;
+      // std::uninitialized_copy(_end - n, _end, _end);
+      // std::copy_backward(p, _end - n, _end - 1);
+      // std::copy(first, last, p);
+      // _end += n;
     }
     return iterator(p);
   }
@@ -472,17 +448,20 @@ class vector : protected vector_base<T, Allocator> {
   /**
    * @brief removes the last element
    */
-  void pop_back(void) { _end = erase(_end); }
+  void pop_back(void) {
+    erase(_end);
+    --_end;
+  }
 
   /*
    * @brief changes the number of elements stored
    */
   void resize(size_type new_size, value_type value = value_type()) {
     if (new_size < size()) {
-      erase(begin() + new_size, end());
-      _end = _begin + new_size;
+      erase(_begin + new_size, _end);
+      // _end = _begin + new_size;
     } else {
-      insert(_end, size() - new_size, value);  // included reallocate
+      insert(_end, new_size - size(), value);  // included reallocate
     }
   }
 
@@ -500,12 +479,20 @@ class vector : protected vector_base<T, Allocator> {
 
   // SECTION 2-3. Private Member Functions
  private:
-  // template <typename _T>
-  // void _swap(_T& a, _T& b) {
-  //   _T tmp(a);
-  //   a = b;
-  //   b = tmp;
-  // }
+  void _construct_at_end(size_type n, const value_type& val) {
+    for (size_type i = 0; i < n; ++i) {
+      _alloc.construct(_end, val);  // ERROR
+      ++_end;
+    }
+  }
+
+  // TODO refactoring
+  size_type _get_new_capacity(size_type new_size) {
+    size_type new_cap =
+        _alloc.max_size() > capacity() * 2 ? capacity() * 2 : _alloc.max_size();
+
+    return (new_size < new_cap ? new_cap : new_size);
+  }
 };
 // !SECTION 2
 
@@ -515,7 +502,8 @@ class vector : protected vector_base<T, Allocator> {
  */
 template <typename T, typename Alloc>
 bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-  return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+  return lhs.size() == rhs.size() &&
+         ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 template <typename T, typename Alloc>
@@ -531,7 +519,7 @@ bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 
 template <typename T, typename Alloc>
 bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-  return !(lhs < rhs);
+  return !(lhs > rhs);
 }
 
 template <typename T, typename Alloc>
@@ -543,7 +531,7 @@ bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 
 template <typename T, typename Alloc>
 bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-  return !(lhs > rhs);
+  return !(lhs < rhs);
 }
 
 // !SECTION 3-1
