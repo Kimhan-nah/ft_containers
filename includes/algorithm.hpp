@@ -80,6 +80,15 @@ bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2,
 }
 
 // !SECTION
+
+// SECTION swap
+template <typename T>
+void _swap(T& a, T& b) {
+  T tmp(a);
+  a = b;
+  b = tmp;
+}
+
 }  // namespace ft
 
 #endif

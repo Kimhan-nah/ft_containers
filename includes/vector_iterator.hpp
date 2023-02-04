@@ -66,7 +66,7 @@ struct vector_iterator {
   // SECTION operators
   // operator *, ->, [], ++, --, +, -, +=, -=
   reference operator*(void) const { return *current; }
-  pointer operator->(void) const { return &current; }
+  pointer operator->(void) const { return current; }
   reference operator[](difference_type n) const { return current[n]; }
 
   // ++iter

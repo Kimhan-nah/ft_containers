@@ -1,6 +1,10 @@
-// erasing from vector
+#include "iterator.hpp"
+
 #include <iostream>
 #include <vector>
+
+#include "vector.hpp"
+#include "vector_iterator.hpp"
 
 int main() {
   std::vector<int> myvector;

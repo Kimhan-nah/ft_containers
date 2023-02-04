@@ -53,7 +53,7 @@ class vector_base {
       : _alloc(alloc), _begin(NULL), _end(NULL), _end_cap(NULL) {}
   explicit vector_base(size_type count, const allocator_type& alloc)
       : _alloc(alloc),
-        _begin(_alloc.allocator(count)),  // allocate & return pointer
+        _begin(_alloc.allocate(count)),  // allocate & return pointer
         _end(_begin),
         _end_cap(_begin + count) {}
   ~vector_base(void) { _alloc.deallocate(_begin, _end_cap - _begin); }
@@ -68,7 +68,7 @@ class vector_base {
  * allocation model
  */
 template <typename T, typename Allocator = std::allocator<T> >
-class vector : public vector_base<T, Allocator> {
+class vector : protected vector_base<T, Allocator> {
  private:
   typedef vector_base<T, Allocator> _Base;
 
@@ -126,7 +126,7 @@ class vector : public vector_base<T, Allocator> {
     _end = std::uninitialized_copy(first, last, _begin);
   }
   // 4. copy
-  vector(const vector& other) : _Base(other._alloc, other.size()) {
+  vector(const vector& other) : _Base(other.size(), other._alloc) {
     _end = std::uninitialized_copy(other._begin, other._end, _begin);
   }
 
@@ -153,8 +153,6 @@ class vector : public vector_base<T, Allocator> {
   void assign(InputIter first, InputIter last,
               typename ft::enable_if<!ft::is_integral<InputIter>::value,
                                      InputIter>::type* = NULL) {
-    size_type n = last - first;
-
     clear();
     for (; first != last; first++) push_back(*first);  // included reallocate
   }
@@ -273,7 +271,7 @@ class vector : public vector_base<T, Allocator> {
       vector tmp;
 
       tmp._begin = _alloc.allocate(new_cap);
-      tmp._end = std::uninitialized_copy(begin(), end(), tmp.begin());
+      tmp._end = std::uninitialized_copy(_begin, _end, tmp._begin);
       tmp._end_cap = tmp._begin + new_cap;
       swap(tmp);
     }
@@ -291,13 +289,16 @@ class vector : public vector_base<T, Allocator> {
    * @brief clears the contents
    * @note erases all elements from the container
    */
-  void clear(void) { _end = erase(begin(), end()); }
+  void clear(void) {
+    erase(begin(), end());
+    _end = _begin;
+  }
 
   /**
    * @brief inserts elements
    */
   // 1. single element
-  iterator insert(const_iterator pos, const value_type& val) {
+  iterator insert(iterator pos, const value_type& val) {
     pointer p = _begin + (pos - begin());
 
     if (size() + 1 > capacity()) {  // _end == _end_cap
@@ -328,7 +329,7 @@ class vector : public vector_base<T, Allocator> {
   }
 
   // 2. fill
-  iterator insert(const_iterator pos, size_type n, const value_type& val) {
+  iterator insert(iterator pos, size_type n, const value_type& val) {
     pointer p = _begin + (pos - begin());
 
     if (size() + n > capacity()) {
@@ -361,7 +362,7 @@ class vector : public vector_base<T, Allocator> {
 
   // 3. range
   template <typename InputIter>
-  iterator insert(const_iterator pos, InputIter first, InputIter last,
+  iterator insert(iterator pos, InputIter first, InputIter last,
                   typename ft::enable_if<!ft::is_integral<InputIter>::value,
                                          InputIter>::type* = NULL) {
     pointer p = _begin + (pos - begin());
@@ -476,9 +477,9 @@ class vector : public vector_base<T, Allocator> {
    * @brief swaps the contents
    */
   void swap(vector& other) {
-    _swap(_begin, other._begin);
-    _swap(_end, other._end);
-    _swap(_end_cap, other._end_cap);
+    ft::_swap(_begin, other._begin);
+    ft::_swap(_end, other._end);
+    ft::_swap(_end_cap, other._end_cap);
   }
 
   // !SECTION 2-2-5
@@ -486,11 +487,12 @@ class vector : public vector_base<T, Allocator> {
 
   // SECTION 2-3. Private Member Functions
  private:
-  void _swap(T& a, T& b) {
-    T tmp(a);
-    a = b;
-    b = tmp;
-  }
+  // template <typename _T>
+  // void _swap(_T& a, _T& b) {
+  //   _T tmp(a);
+  //   a = b;
+  //   b = tmp;
+  // }
 };
 // !SECTION 2
 
@@ -539,7 +541,6 @@ void swap(ft::vector<T, Alloc>& lhs, ft::vector<T, Alloc>& rhs) {
   lhs.swap(rhs);
 }
 // !SECTION 3-2
-
 // !SECTION 3
 }  // namespace ft
 
