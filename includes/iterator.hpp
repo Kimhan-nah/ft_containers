@@ -215,39 +215,39 @@ class reverse_iterator
  */
 // CHECK cplusplus & GCC -> both the same template parameter
 // cppreference & LLVM -> different template parameter
-template <typename Iter1, typename Iter2>
-bool operator==(const ft::reverse_iterator<Iter1> &lhs,
-                const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator==(const ft::reverse_iterator<IterL> &lhs,
+                const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() == rhs.base();
 }
 
-template <typename Iter1, typename Iter2>
-bool operator!=(const ft::reverse_iterator<Iter1> &lhs,
-                const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator!=(const ft::reverse_iterator<IterL> &lhs,
+                const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() != rhs.base();
 }
 
-template <typename Iter1, typename Iter2>
-bool operator>(const ft::reverse_iterator<Iter1> &lhs,
-               const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator>(const ft::reverse_iterator<IterL> &lhs,
+               const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() < rhs.base();
 }
 
-template <typename Iter1, typename Iter2>
-bool operator>=(const ft::reverse_iterator<Iter1> &lhs,
-                const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator>=(const ft::reverse_iterator<IterL> &lhs,
+                const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() <= rhs.base();
 }
 
-template <typename Iter1, typename Iter2>
-bool operator<(const ft::reverse_iterator<Iter1> &lhs,
-               const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator<(const ft::reverse_iterator<IterL> &lhs,
+               const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() > rhs.base();
 }
 
-template <typename Iter1, typename Iter2>
-bool operator<=(const ft::reverse_iterator<Iter1> &lhs,
-                const ft::reverse_iterator<Iter2> &rhs) {
+template <typename IterL, typename IterR>
+bool operator<=(const ft::reverse_iterator<IterL> &lhs,
+                const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() >= rhs.base();
 }
 
@@ -262,10 +262,10 @@ reverse_iterator<Iter> operator+(
 
 // operator-
 // rhs.base() - lhs.base()
-template <class Iterator1, class Iterator2>
-typename reverse_iterator<Iterator1>::difference_type operator-(
-    const reverse_iterator<Iterator1> &lhs,
-    const reverse_iterator<Iterator2> &rhs) {
+template <class IterL, class IterR>
+typename reverse_iterator<IterL>::difference_type operator-(
+    const reverse_iterator<IterL> &lhs,
+    const reverse_iterator<IterR> &rhs) {
   return rhs.base() - lhs.base();
 }
 

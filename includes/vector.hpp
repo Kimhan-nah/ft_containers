@@ -15,6 +15,8 @@
 // std::allocator<T>
 #include <memory>
 #include <vector>
+// TODO delete iostream
+#include <iostream>
 
 // ft::reverse_iterator
 #include "algorithm.hpp"
@@ -84,11 +86,6 @@ class vector : protected vector_base<T, Allocator> {
   typedef typename _Base::size_type size_type;
   typedef typename _Base::difference_type difference_type;
 
-  // typedef typename _Base::_alloc _alloc;
-  // typedef typename _Base::_begin _begin;
-  // typedef typename _Base::_end _end;
-  // typedef typename _Base::_end_cap _end_cap;
-
   using _Base::_alloc;
   using _Base::_begin;
   using _Base::_end;
@@ -122,7 +119,7 @@ class vector : protected vector_base<T, Allocator> {
          const allocator_type& alloc = allocator_type(),
          typename ft::enable_if<!ft::is_integral<InputIter>::value,
                                 InputIter>::type* = NULL)
-      : _Base(alloc) {
+      : _Base(std::distance(first, last), alloc) {
     _end = std::uninitialized_copy(first, last, _begin);
   }
   // 4. copy
@@ -305,27 +302,30 @@ class vector : protected vector_base<T, Allocator> {
       // reallocate
       vector tmp;
 
-      tmp._begin = _alloc.allocate(capacity() * 2);
+      size_type new_size = (capacity() * 2 == 0) ? 2 : capacity() * 2;
+      tmp._begin = _alloc.allocate(new_size);
+      tmp._end_cap = _begin + new_size;
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-      // _alloc.construct(tmp._end, val);
-      tmp._end = std::uninitialized_copy(p + 1, _end,
-                                         tmp._end + 1);  // [p + 1, _end)
+      // std::cout << "end - begin :  " << tmp._end - tmp._begin << '\n';
+      std::uninitialized_fill_n(tmp._end, 1, val);  // insert single element
+      ++tmp._end;
+      tmp._end = std::uninitialized_copy(p, _end,
+                                         tmp._end);  // [p, _end)
       swap(tmp);
     } else {
       // construct at end
       std::uninitialized_copy(_end - 1, _end, _end);
 
       // relocate
-      std::copy_backward(p, _end - 1, _end - 1);
+      std::copy_backward(pos, end() - 1, end() - 1);
 
       // insert
-      *p = val;
+      *pos = val;
 
       // update _end
       ++_end;
-
-      return iterator(p);
     }
+    return iterator(pos);
   }
 
   // 2. fill
@@ -340,22 +340,33 @@ class vector : protected vector_base<T, Allocator> {
 
       tmp._begin = _alloc.allocate(new_size);
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
-      tmp._end = std::uninitialized_copy(p + n, _end,
-                                         tmp._end + n);  // [p + n, _end)
+
+      tmp._end =
+          std::uninitialized_fill_n(tmp._end, n, val);  // insert elements
+
+      tmp._end = std::uninitialized_copy(p, _end,
+                                         tmp._end);  // [p, _end)
       swap(tmp);
 
     } else {
-      // constructs at end
-      std::uninitialized_copy(_end - n, _end, _end);
+      // CHECK n > size() ???
+      if (n > size()) {
+        // constructs at end
+        // std::cout << "_end : " << _end - n << std::endl;
+        std::cout << "_end - n : " << *(_end - n) << std::endl;
+        std::uninitialized_copy(_end - n, _end, _end);
+        // std::uninitialized_copy(p, _end, p + n);
 
-      // relocate [p, _end - n)
-      std::copy_backward(p, _end - n, _end - 1);
+        // relocate [p, _end - n)
+        std::copy_backward(p, _end - n, _end - 1);
 
-      // insert
-      std::fill_n(p, n, val);
+        // insert
+        std::fill_n(p, n, val);
 
-      // update _end
-      _end += n;
+        // update _end
+        _end += n;
+      } else {
+      }
     }
     return iterator(p);
   }
@@ -366,7 +377,8 @@ class vector : protected vector_base<T, Allocator> {
                   typename ft::enable_if<!ft::is_integral<InputIter>::value,
                                          InputIter>::type* = NULL) {
     pointer p = _begin + (pos - begin());
-    difference_type n = last - first;
+    // pointer p = _begin + std::distance(pos, begin());
+    difference_type n = std::distance(first, last);
 
     if (size() + n > capacity()) {
       // reallocate
@@ -379,10 +391,10 @@ class vector : protected vector_base<T, Allocator> {
       tmp._end = std::uninitialized_copy(_begin, p, tmp._begin);  // [_begin, p)
 
       // copy [first, last)
-      tmp._end = std::uninitialized_copy(first, last, tmp._end);  // [p, p + n)
+      tmp._end = std::uninitialized_copy(first, last, tmp._end);
 
-      tmp._end = std::uninitialized_copy(p + n, _end,
-                                         tmp._end);  // [p + n, _end)
+      tmp._end = std::uninitialized_copy(p, _end,
+                                         tmp._end);  // [p, _end)
       swap(tmp);
     } else {
       // constructs at end
@@ -415,7 +427,7 @@ class vector : protected vector_base<T, Allocator> {
   iterator erase(iterator pos) {
     pointer _p = _begin + (pos - begin());
 
-    if (_p != _end - 1) {
+    if (_p != _end) {
       _alloc.destroy(_p);
       // relocate
       std::copy(pos + 1, end(), pos);
@@ -429,17 +441,17 @@ class vector : protected vector_base<T, Allocator> {
     difference_type n = last - first;
     pointer _first = _begin + (first - begin());
     pointer _last = _begin + (last - begin());
-    pointer _p = _first;
+    // pointer _p = _first;
 
     if (first != last) {
-      for (; _p < _last; _p++) {
+      for (pointer _p = _first; _p < _last; _p++) {
         _alloc.destroy(_p);
       }
       // relocate
       std::copy(last, end(), first);
       _end -= n;
     }
-    return iterator(_p);
+    return iterator(_first);
   }
 
   /**
@@ -467,7 +479,8 @@ class vector : protected vector_base<T, Allocator> {
    */
   void resize(size_type new_size, value_type value = value_type()) {
     if (new_size < size()) {
-      _end = erase(begin() + new_size, end());
+      erase(begin() + new_size, end());
+      _end = _begin + new_size;
     } else {
       insert(_end, size() - new_size, value);  // included reallocate
     }

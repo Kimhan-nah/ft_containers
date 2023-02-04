@@ -14,6 +14,7 @@
 #include <iterator>
 
 #include "iterator"
+#include "type_traits.hpp"
 
 namespace ft {
 /** SECTION 0. vector_iterator
@@ -40,12 +41,13 @@ struct vector_iterator {
   // SECTION constructor
   vector_iterator(void) : current(iterator_type()) {}
 
-  explicit vector_iterator(const iterator_type& other) : current(other) {}
+  // copy constructor
+  vector_iterator(const iterator_type& other) : current(other) {}
 
   // Allow iterator to const_iterator conversion
-  // CHECK copy constructor?
+  // const copy constructor (non-const -> const)
   template <typename _Iter>
-  explicit vector_iterator(const vector_iterator<_Iter>& other)
+  vector_iterator(const vector_iterator<_Iter>& other)
       : current(other.base()) {}
 
   // base()
@@ -176,9 +178,9 @@ vector_iterator<Iter> operator-(
  * @param rhs right-iterator
  * @return difference_type
  */
-template <typename Iter>
-typename vector_iterator<Iter>::difference_type operator-(
-    const vector_iterator<Iter>& lhs, const vector_iterator<Iter>& rhs) {
+template <typename IterL, typename IterR>
+typename vector_iterator<IterL>::difference_type operator-(
+    const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() - rhs.base();
 }
 // !SECTION
