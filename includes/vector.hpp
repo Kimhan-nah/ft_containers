@@ -92,8 +92,11 @@ class vector : protected vector_base<T, Allocator> {
   typedef ft::vector_iterator<pointer> iterator;
   typedef ft::vector_iterator<const_pointer> const_iterator;
 
-  typedef ft::reverse_iterator<iterator> reverse_iterator;
-  typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+  // typedef ft::reverse_iterator<iterator> reverse_iterator;
+  // typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+
+  typedef ft::reverse_iterator<pointer> reverse_iterator;
+  typedef ft::reverse_iterator<const_pointer> const_reverse_iterator;
 
   // !SECTION 2-1
 
@@ -223,6 +226,8 @@ class vector : protected vector_base<T, Allocator> {
   reverse_iterator rbegin(void) { return reverse_iterator(end()); }
   const_reverse_iterator rbegin(void) const {
     return const_reverse_iterator(end());
+    // TODO
+    // return const_reverse_iterator(_m_end);
   }
 
   reverse_iterator rend(void) { return reverse_iterator(begin()); }

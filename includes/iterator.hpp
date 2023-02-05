@@ -85,17 +85,18 @@ struct iterator_traits<const Tp *> {
  */
 template <typename Iter>
 class reverse_iterator
-    : public ft::iterator<typename iterator_traits<Iter>::iterator_category,
-                          typename iterator_traits<Iter>::value_type,
-                          typename iterator_traits<Iter>::difference_type,
-                          typename iterator_traits<Iter>::pointer,
-                          typename iterator_traits<Iter>::reference> {
+    : public ft::iterator<typename ft::iterator_traits<Iter>::iterator_category,
+                          typename ft::iterator_traits<Iter>::value_type,
+                          typename ft::iterator_traits<Iter>::difference_type,
+                          typename ft::iterator_traits<Iter>::pointer,
+                          typename ft::iterator_traits<Iter>::reference> {
  public:
-  typedef typename iterator_traits<Iter>::iterator_category iterator_category;
-  typedef typename iterator_traits<Iter>::value_type value_type;
-  typedef typename iterator_traits<Iter>::difference_type difference_type;
-  typedef typename iterator_traits<Iter>::pointer pointer;
-  typedef typename iterator_traits<Iter>::reference reference;
+  typedef
+      typename ft::iterator_traits<Iter>::iterator_category iterator_category;
+  typedef typename ft::iterator_traits<Iter>::value_type value_type;
+  typedef typename ft::iterator_traits<Iter>::difference_type difference_type;
+  typedef typename ft::iterator_traits<Iter>::pointer pointer;
+  typedef typename ft::iterator_traits<Iter>::reference reference;
 
   typedef Iter iterator_type;
 
@@ -116,7 +117,8 @@ class reverse_iterator
   // 1. default
   reverse_iterator(void) : current() {}
   // 2. initialization
-  explicit reverse_iterator(iterator_type it) : current(it) {}
+  // int *it
+  reverse_iterator(iterator_type it) : current(it) {}
   // 3. copy / type-cast constructor
   template <typename _Iter>
   reverse_iterator(const reverse_iterator<_Iter> &rev_it)
@@ -264,8 +266,7 @@ reverse_iterator<Iter> operator+(
 // rhs.base() - lhs.base()
 template <class IterL, class IterR>
 typename reverse_iterator<IterL>::difference_type operator-(
-    const reverse_iterator<IterL> &lhs,
-    const reverse_iterator<IterR> &rhs) {
+    const reverse_iterator<IterL> &lhs, const reverse_iterator<IterR> &rhs) {
   return rhs.base() - lhs.base();
 }
 

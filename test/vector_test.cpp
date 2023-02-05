@@ -67,6 +67,10 @@ int main(void) {
     printSize(vct_two);
   }
   {
+    std::cout << "==== bidirect_it.cpp test ====" << std::endl;
+    ft::vector<int> myvector;
+  }
+  {
     std::cout << "==== erase test ==== " << std::endl;
 
     std::vector<int> myvector;
