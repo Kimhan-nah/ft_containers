@@ -14,9 +14,6 @@
 
 // std::allocator<T>
 #include <memory>
-#include <vector>
-// TODO delete iostream
-#include <iostream>
 
 // ft::reverse_iterator
 #include "algorithm.hpp"
