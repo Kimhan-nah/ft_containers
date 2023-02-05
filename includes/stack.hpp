@@ -16,7 +16,6 @@
 namespace ft {
 template <typename T, typename Container = ft::vector<T> >
 class stack {
-  //  protected:
  public:
   // typedef T value_type;
   typedef Container container_type;
@@ -27,34 +26,35 @@ class stack {
 
  protected:
   // Member objects
-  container_type _c;
+  container_type _m_cont;
 
  public:
   // SECTION Member functions
   // 1. constructor & destructor
-  explicit stack(const container_type& cont = container_type()) : _c(cont) {}
+  explicit stack(const container_type& cont = container_type())
+      : _m_cont(cont) {}
   // CHECK copy constructor doesn't needed
-  // stack(const stack& other) : _c(cont) {}
+  // stack(const stack& other) : _m_cont(cont) {}
 
   // CHECK only cppreference
   ~stack(void) {}
 
   stack& operator=(const stack& other) {
-    _c = other._c;
+    _m_cont = other._m_cont;
     return *this;
   }
 
   // 2. Element access
-  reference top(void) { return _c.back(); }
-  reference top(void) const { return _c.back(); }
+  reference top(void) { return _m_cont.back(); }
+  reference top(void) const { return _m_cont.back(); }
 
   // 3. Capacity
-  bool empty(void) const { return _c.empty(); }
-  size_type size(void) const { return _c.size(); }
+  bool empty(void) const { return _m_cont.empty(); }
+  size_type size(void) const { return _m_cont.size(); }
 
   // 4. Modifiers
-  void push(const value_type& value) { _c.push_back(value); }
-  void pop(void) { _c.pop_back(); }
+  void push(const value_type& value) { _m_cont.push_back(value); }
+  void pop(void) { _m_cont.pop_back(); }
 
   // friend declaration for access to the protected member object 'c'
   template <typename _T, typename _Container>
@@ -72,7 +72,7 @@ class stack {
 template <typename T, typename Container>
 bool operator==(const ft::stack<T, Container>& lhs,
                 const ft::stack<T, Container>& rhs) {
-  return lhs._c == rhs._c;
+  return lhs._m_cont == rhs._m_cont;
 }
 
 // !=
@@ -86,7 +86,7 @@ bool operator!=(const ft::stack<T, Container>& lhs,
 template <typename T, typename Container>
 bool operator<(const ft::stack<T, Container>& lhs,
                const ft::stack<T, Container>& rhs) {
-  return lhs._c < rhs._c;
+  return lhs._m_cont < rhs._m_cont;
 }
 
 // <=
