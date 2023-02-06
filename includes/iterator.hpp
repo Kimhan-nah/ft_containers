@@ -14,7 +14,7 @@
 
 // std::ptrdiff_t
 #include <cstddef>
-// std::iterator, std::random_access_iterator_tag
+// std::random_access_iterator_tag
 #include <iterator>
 
 namespace ft {
@@ -28,8 +28,8 @@ namespace ft {
  * @tparam Pointer - T*
  * @tparam Reference - T&
  */
-template <typename Category, typename T, typename Distance = std::ptrdiff_t,
-          typename Pointer = T *, typename Reference = T &>
+template <typename Category, typename T, typename Distance = std::ptrdiff_t, typename Pointer = T *,
+          typename Reference = T &>
 struct iterator {
   typedef Category iterator_category;
   typedef T value_type;
@@ -84,15 +84,13 @@ struct iterator_traits<const Tp *> {
  * @tparam Iter - bidirectional iterator type || random-access iterator type
  */
 template <typename Iter>
-class reverse_iterator
-    : public ft::iterator<typename ft::iterator_traits<Iter>::iterator_category,
-                          typename ft::iterator_traits<Iter>::value_type,
-                          typename ft::iterator_traits<Iter>::difference_type,
-                          typename ft::iterator_traits<Iter>::pointer,
-                          typename ft::iterator_traits<Iter>::reference> {
+class reverse_iterator : public ft::iterator<typename ft::iterator_traits<Iter>::iterator_category,
+                                             typename ft::iterator_traits<Iter>::value_type,
+                                             typename ft::iterator_traits<Iter>::difference_type,
+                                             typename ft::iterator_traits<Iter>::pointer,
+                                             typename ft::iterator_traits<Iter>::reference> {
  public:
-  typedef
-      typename ft::iterator_traits<Iter>::iterator_category iterator_category;
+  typedef typename ft::iterator_traits<Iter>::iterator_category iterator_category;
   typedef typename ft::iterator_traits<Iter>::value_type value_type;
   typedef typename ft::iterator_traits<Iter>::difference_type difference_type;
   typedef typename ft::iterator_traits<Iter>::pointer pointer;
@@ -121,8 +119,7 @@ class reverse_iterator
   reverse_iterator(iterator_type it) : current(it) {}
   // 3. copy / type-cast constructor
   template <typename _Iter>
-  reverse_iterator(const reverse_iterator<_Iter> &rev_it)
-      : current(rev_it.base()) {}
+  reverse_iterator(const reverse_iterator<_Iter> &rev_it) : current(rev_it.base()) {}
 
   // CHECK only cppreference.. there are no operaotr= in cplusplus and gcc code.
   // reverse_iterator tmp = *this;
@@ -188,13 +185,9 @@ class reverse_iterator
     return tmp;
   }
 
-  reverse_iterator operator+(difference_type n) const {
-    return reverse_iterator(current - n);
-  }
+  reverse_iterator operator+(difference_type n) const { return reverse_iterator(current - n); }
 
-  reverse_iterator operator-(difference_type n) const {
-    return reverse_iterator(current + n);
-  }
+  reverse_iterator operator-(difference_type n) const { return reverse_iterator(current + n); }
 
   reverse_iterator &operator+=(difference_type n) {
     current -= n;
@@ -218,55 +211,48 @@ class reverse_iterator
 // CHECK cplusplus & GCC -> both the same template parameter
 // cppreference & LLVM -> different template parameter
 template <typename IterL, typename IterR>
-bool operator==(const ft::reverse_iterator<IterL> &lhs,
-                const ft::reverse_iterator<IterR> &rhs) {
+bool operator==(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() == rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator!=(const ft::reverse_iterator<IterL> &lhs,
-                const ft::reverse_iterator<IterR> &rhs) {
+bool operator!=(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() != rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator>(const ft::reverse_iterator<IterL> &lhs,
-               const ft::reverse_iterator<IterR> &rhs) {
+bool operator>(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() < rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator>=(const ft::reverse_iterator<IterL> &lhs,
-                const ft::reverse_iterator<IterR> &rhs) {
+bool operator>=(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() <= rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator<(const ft::reverse_iterator<IterL> &lhs,
-               const ft::reverse_iterator<IterR> &rhs) {
+bool operator<(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() > rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator<=(const ft::reverse_iterator<IterL> &lhs,
-                const ft::reverse_iterator<IterR> &rhs) {
+bool operator<=(const ft::reverse_iterator<IterL> &lhs, const ft::reverse_iterator<IterR> &rhs) {
   return lhs.base() >= rhs.base();
 }
 
 // operator+
 // n + it
 template <class Iter>
-reverse_iterator<Iter> operator+(
-    typename reverse_iterator<Iter>::difference_type n,
-    const reverse_iterator<Iter> &rev_it) {
+reverse_iterator<Iter> operator+(typename reverse_iterator<Iter>::difference_type n,
+                                 const reverse_iterator<Iter> &rev_it) {
   return reverse_iterator<Iter>(rev_it.base() - n);
 }
 
 // operator-
 // rhs.base() - lhs.base()
 template <class IterL, class IterR>
-typename reverse_iterator<IterL>::difference_type operator-(
-    const reverse_iterator<IterL> &lhs, const reverse_iterator<IterR> &rhs) {
+typename reverse_iterator<IterL>::difference_type operator-(const reverse_iterator<IterL> &lhs,
+                                                            const reverse_iterator<IterR> &rhs) {
   return rhs.base() - lhs.base();
 }
 

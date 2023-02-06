@@ -31,8 +31,7 @@ struct vector_iterator {
   typedef typename ft::iterator_traits<Iter>::difference_type difference_type;
   typedef typename ft::iterator_traits<Iter>::reference reference;
   typedef typename ft::iterator_traits<Iter>::pointer pointer;
-  typedef
-      typename ft::iterator_traits<Iter>::iterator_category iterator_category;
+  typedef typename ft::iterator_traits<Iter>::iterator_category iterator_category;
 
  protected:
   iterator_type current;
@@ -47,8 +46,7 @@ struct vector_iterator {
   // Allow iterator to const_iterator conversion
   // const copy constructor (non-const -> const)
   template <typename _Iter>
-  vector_iterator(const vector_iterator<_Iter>& other)
-      : current(other.base()) {}
+  vector_iterator(const vector_iterator<_Iter>& other) : current(other.base()) {}
 
   // base()
   // CHECK return const iterator_type&?? (reverse_iterator base)
@@ -88,12 +86,8 @@ struct vector_iterator {
   vector_iterator operator--(int) { return vector_iterator(current--); }
 
   // iter + n, iter - n
-  vector_iterator operator+(const difference_type& n) const {
-    return vector_iterator(current + n);
-  }
-  vector_iterator operator-(const difference_type& n) const {
-    return vector_iterator(current - n);
-  }
+  vector_iterator operator+(const difference_type& n) const { return vector_iterator(current + n); }
+  vector_iterator operator-(const difference_type& n) const { return vector_iterator(current - n); }
 
   vector_iterator& operator+=(const difference_type& n) {
     current += n;
@@ -109,38 +103,32 @@ struct vector_iterator {
 
 // SECTION 1. compare operators ==, !=, <. <=, >, >=
 template <typename IterL, typename IterR>
-bool operator==(const vector_iterator<IterL>& lhs,
-                const vector_iterator<IterR>& rhs) {
+bool operator==(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() == rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator!=(const vector_iterator<IterL>& lhs,
-                const vector_iterator<IterR>& rhs) {
+bool operator!=(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() != rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator<(const vector_iterator<IterL>& lhs,
-               const vector_iterator<IterR>& rhs) {
+bool operator<(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() < rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator<=(const vector_iterator<IterL>& lhs,
-                const vector_iterator<IterR>& rhs) {
+bool operator<=(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() <= rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator>(const vector_iterator<IterL>& lhs,
-               const vector_iterator<IterR>& rhs) {
+bool operator>(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() > rhs.base();
 }
 
 template <typename IterL, typename IterR>
-bool operator>=(const vector_iterator<IterL>& lhs,
-                const vector_iterator<IterR>& rhs) {
+bool operator>=(const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
   return lhs.base() >= rhs.base();
 }
 // !SECTION 1
@@ -155,9 +143,8 @@ bool operator>=(const vector_iterator<IterL>& lhs,
  * @return vector_iterator<Iter>
  */
 template <typename Iter>
-vector_iterator<Iter> operator+(
-    const typename vector_iterator<Iter>::difference_type& n,
-    const vector_iterator<Iter>& iter) {
+vector_iterator<Iter> operator+(const typename vector_iterator<Iter>::difference_type& n,
+                                const vector_iterator<Iter>& iter) {
   return vector_iterator<Iter>(iter.base() + n);
 }
 
@@ -166,9 +153,8 @@ vector_iterator<Iter> operator+(
  * @return vector_iterator<Iter>
  */
 template <typename Iter>
-vector_iterator<Iter> operator-(
-    const typename vector_iterator<Iter>::difference_type& n,
-    const vector_iterator<Iter>& iter) {
+vector_iterator<Iter> operator-(const typename vector_iterator<Iter>::difference_type& n,
+                                const vector_iterator<Iter>& iter) {
   return vector_iterator<Iter>(n - iter.base());
 }
 
@@ -179,8 +165,8 @@ vector_iterator<Iter> operator-(
  * @return difference_type
  */
 template <typename IterL, typename IterR>
-typename vector_iterator<IterL>::difference_type operator-(
-    const vector_iterator<IterL>& lhs, const vector_iterator<IterR>& rhs) {
+typename vector_iterator<IterL>::difference_type operator-(const vector_iterator<IterL>& lhs,
+                                                           const vector_iterator<IterR>& rhs) {
   return lhs.base() - rhs.base();
 }
 // !SECTION
