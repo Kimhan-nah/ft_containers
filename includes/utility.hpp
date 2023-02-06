@@ -6,7 +6,7 @@
  * @date 2023-02-05
  *
  * @copyright Copyright (c) 2023
- * @note std::pair(class template), std::make_pair(function template)
+ * @note pair (make_pair)
  */
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
@@ -24,7 +24,7 @@ struct pair {
 
   // constructors
   // default
-  pair(void) : first(), second() {}
+  pair(void) : first(void), second(void) {}
 
   // copy
   template <typename U1, typename U2>
@@ -42,12 +42,42 @@ struct pair {
 };
 
 // SECTION Non-member functions
-// NOTE relational operators, make_pair
-
 // SECTION relational operators
+// ==
 template <class T1, class T2>
-bool operator==(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs);
+bool operator==(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return lhs.first == rhs.first && lhs.second == rhs.second;
+}
 
+// !=
+template <class T1, class T2>
+bool operator!=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return !(lhs == rhs);
+}
+
+// < : lexicographical compare
+template <class T1, class T2>
+bool operator<(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
+}
+
+// <= : lexicographical compare
+template <class T1, class T2>
+bool operator<=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return !(rhs < lhs);
+}
+
+// > : lexicographical compare
+template <class T1, class T2>
+bool operator>(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return rhs < lhs;
+}
+
+// >= : lexicographical compare
+template <class T1, class T2>
+bool operator>=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+  return !(lhs < rhs);
+}
 // !SECTION relational operators
 
 /** SECTION make_pair
@@ -60,7 +90,9 @@ bool operator==(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs);
  * @return pair<T1, T2>
  */
 template <typename T1, typename T2>
-pair<T1, T2> make_pair(T1 t, T2 u);
+pair<T1, T2> make_pair(T1 t, T2 u) {
+  return (pair<T1, T2>(x, y));
+}
 // !SECTION make_pair
 
 // !SECTION pair
