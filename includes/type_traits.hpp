@@ -6,7 +6,7 @@
  * @date 2023-02-01
  *
  * @copyright Copyright (c) 2023
- *
+ * @note enalbe_if, is_integral
  */
 #ifndef TYPE_TRAITS_HPP
 #define TYPE_TRAITS_HPP
