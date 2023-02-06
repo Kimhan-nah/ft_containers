@@ -16,6 +16,7 @@
 // std::allocator
 #include <memory>
 
+#include "tree.hpp"
 #include "utility.hpp"
 
 namespace ft {
@@ -38,6 +39,11 @@ class map {
   typedef ft::pair<const key_type, mapped_type> value_type;
   typedef Compare key_compare;
 
+  /**
+   * @brief nested function class to compare elements
+   */
+  class value_compare : public binary_function<value_type, value_type, bool> {};
+
   typedef Alloc allocator_type;
   typedef typename allocator_type::reference reference;
   typedef typename allocator_type::const_reference const_reference;
@@ -46,20 +52,12 @@ class map {
   typedef typename allocator_type::size_type size_type;
   typedef typename allocator_type::difference_type difference_type;
 
-  // iterator types
-  typedef ft::map_iterator<> iterator;
-  typedef ft::map_iterator<> iterator;
-  typedef ft::reverse_iterator<iterator> reverse_iterator;
-  typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+ private:
+  typedef _rb_tree<key_type, value_type, _SelectKey<value_type>, key_compare, allocator_type>
+      _rep_type;
+  // member object
+  _rep_type _tree;
 
-  /**
-   * @brief nested function class to compare elements
-   */
-  class value_compare : public binary_function<value_type, value_type, bool> {
-    friend class map;
-
-   protected:
-  };
   // !SECTION
 
  public:
@@ -141,8 +139,7 @@ class map {
 
   /// equal_range
   ft::pair<iterator, iterator> equal_range(const key_type& key);
-  ft::pair<const_iterator, const_iterator> equal_range(
-      const key_type& key) const;
+  ft::pair<const_iterator, const_iterator> equal_range(const key_type& key) const;
 
   // lower_bound
   iterator lower_bound(const key_type& key);
@@ -194,8 +191,7 @@ bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
 
 // swap
 template <class Key, class T, class Compare, class Alloc>
-void swap(std::map<Key, T, Compare, Alloc>& lhs,
-          std::map<Key, T, Compare, Alloc>& rhs);
+void swap(std::map<Key, T, Compare, Alloc>& lhs, std::map<Key, T, Compare, Alloc>& rhs);
 
 }  // namespace ft
 #endif
