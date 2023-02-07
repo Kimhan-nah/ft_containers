@@ -53,8 +53,7 @@ class map {
   typedef typename allocator_type::difference_type difference_type;
 
  private:
-  typedef _rb_tree<key_type, value_type, _SelectKey<value_type>, key_compare, allocator_type>
-      _rep_type;
+  typedef _rb_tree<key_type, value_type, key_compare, allocator_type> _rep_type;
   // member object
   _rep_type _tree;
 
