@@ -28,6 +28,10 @@ namespace ft {
  * @tparam T map::mapped_type
  * @tparam Compare map::key_compare
  * @tparam std::allocator<std::pair<const Key, T>>  map::allocator_type
+ *
+ * @note ft::pair<Key, T> -> value_type
+ * 				==  ft::pair<key_type, mapped_type>
+ * 				== value_type
  */
 template <typename Key, typename T, typename Compare = std::less<Key>,
           typename Alloc = std::allocator<ft::pair<const Key, T> > >
@@ -38,12 +42,6 @@ class map {
   typedef T mapped_type;
   typedef ft::pair<const key_type, mapped_type> value_type;
   typedef Compare key_compare;
-
-  /**
-   * @brief nested function class to compare elements
-   */
-  class value_compare : public binary_function<value_type, value_type, bool> {};
-
   typedef Alloc allocator_type;
   typedef typename allocator_type::reference reference;
   typedef typename allocator_type::const_reference const_reference;
@@ -52,10 +50,19 @@ class map {
   typedef typename allocator_type::size_type size_type;
   typedef typename allocator_type::difference_type difference_type;
 
+  /**
+   * @brief nested function class to compare elements
+   */
+  class value_compare : public binary_function<value_type, value_type, bool> {};
+
  private:
-  typedef _rb_tree<key_type, value_type, key_compare, allocator_type> _rep_type;
+  // tree type
+  typedef _rb_tree<key_type, value_type, key_compare, allocator_type> _rb_tree_type;
+  // typedef _rb_tree<key_type, value_type, select1st<value_type>, key_compare, allocator_type>
+  //     _rb_tree_type;
+
   // member object
-  _rep_type _tree;
+  _rb_tree_type _m_tree;
 
   // !SECTION
 
@@ -63,22 +70,28 @@ class map {
   // SECTION Member functions
   // 1. constructors & Destructor
   // default constructor (empty)
-  map(void);
-  explicit map(const Compare& comp, const Allocator& alloc = Allocator());
+  map(void) : _m_tree(key_compare(), allocator_type()) {}
+  explicit map(const Compare& comp, const Allocator& alloc = Allocator()) : _m_tree(comp, alloc) {}
 
   // range
   template <class InputIt>
   map(InputIt first, InputIt last, const Compare& comp = Compare(),
-      const Allocator& alloc = Allocator());
+      const Allocator& alloc = Allocator())
+      : _m_tree(comp, alloc) {
+    // TODO first ~ last
+  }
 
   // copy constructor
-  map(const map& other);
+  map(const map& other) : _m_tree(other._m_tree) {}
 
   // destructor
-  ~map(void);
+  ~map(void) {}
 
   // operator=
-  map& operator=(const map& other);
+  map& operator=(const map& other) {
+    _m_tree = other._m_tree;
+    return *this;
+  }
 
   // get allocator
   allocator_type get_allocator(void) const;
