@@ -11,7 +11,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-// std::allocator<T>
 #include <memory>
 
 #include "algorithm.hpp"

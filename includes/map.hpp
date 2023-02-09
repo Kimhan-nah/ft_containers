@@ -11,13 +11,11 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-// std::less
-#include <functional>
-// std::allocator
-#include <memory>
+#include <functional>  // std::less
+#include <memory>      // std::allocator
 
-#include "tree.hpp"
-#include "utility.hpp"
+#include "tree.hpp"     // ft::_rb_tree
+#include "utility.hpp"  // ft::pair
 
 namespace ft {
 
@@ -162,9 +160,8 @@ class map {
   const_iterator upper_bound(const key_type& key) const;
 
   // 7. Observers
-  // key_compo
-  key_compare key_comp(void) const;
-  value_compare value_comp(void) const;
+  key_compare key_comp(void) const { return _m_tree.key_comp(); }
+  value_compare value_comp(void) const {return value_compare(_m_tree.key_comp())};
 
   // !SECTION
 };

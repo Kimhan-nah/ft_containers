@@ -93,6 +93,7 @@ iterators invalidated are those referring to the deleted node.
 namespace std {
 enum _Rb_tree_color { _S_red = false, _S_black = true };
 
+// SECTION node_base
 struct _Rb_tree_node_base {
   typedef _Rb_tree_node_base* _Base_ptr;
 
@@ -112,11 +113,14 @@ struct _Rb_tree_node_base {
   }
 };
 
+// SECTION node
 template <typename _Val>
 struct _Rb_tree_node : public _Rb_tree_node_base {
   typedef _Rb_tree_node<_Val>* _Link_type;
   _Val _M_value_field;
 };
+// !SECTION
+// !SECTION
 
 // SECTION base_iterator
 struct _Rb_tree_base_iterator {
@@ -157,7 +161,6 @@ struct _Rb_tree_base_iterator {
     }
   }
 };
-// !SECTION base_iterator
 
 // SECTION iterator
 template <typename _Val, typename _Ref, typename _Ptr>
@@ -201,6 +204,7 @@ struct _Rb_tree_iterator : public _Rb_tree_base_iterator {
   }
 };
 // !SECTION iterator
+// !SECTION base_iterator
 
 template <typename _Val, typename _Ref, typename _Ptr>
 inline bool operator==(const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __x,
@@ -485,7 +489,6 @@ struct _Rb_tree_base
 
   _Rb_tree_base(const allocator_type& __a) : _Base(__a) {}
 };
-// !SECTION
 
 // SECTION Rb tree
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -722,6 +725,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   bool __rb_verify() const;
 };
 // !SECTION Rb tree
+// !SECTION
 
 // SECTION Rb tree Non-member functions
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>

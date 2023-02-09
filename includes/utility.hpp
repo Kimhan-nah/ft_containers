@@ -24,7 +24,7 @@ struct pair {
 
   // constructors
   // default
-  pair(void) : first(void), second(void) {}
+  pair(void) : first(), second() {}
 
   // copy
   template <typename U1, typename U2>
@@ -90,7 +90,7 @@ bool operator>=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
  * @return pair<T1, T2>
  */
 template <typename T1, typename T2>
-pair<T1, T2> make_pair(T1 t, T2 u) {
+pair<T1, T2> make_pair(T1 x, T2 y) {
   return (pair<T1, T2>(x, y));
 }
 // !SECTION make_pair

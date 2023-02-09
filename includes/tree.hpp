@@ -11,15 +11,13 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
-// std::allocator<T>
-#include <memory>
-// std::bidirectional_iterator:tag
-#include <iterator>
-// std::ptrdiff_t, std::size_t
-#include <cstddef>
+#include <cstddef>     // std::ptrdiff_t, std::size_t
+#include <functional>  // std::less
+#include <iterator>    // std::bidirectional_iterator:tag
+#include <memory>      // std::allocator<T>
 
-// reverse_iterator
-#include "iterator.hpp"
+#include "iterator.hpp"  // ft::reverse_iterator
+#include "utility.hpp"   // ft::pair
 
 namespace ft {
 enum _rb_tree_color { RED = false, BLACK = true };
@@ -65,16 +63,24 @@ struct _rb_tree_iterator {
   typedef Ref reference;
   typedef Ptr pointer;
 
+  typedef _rb_tree_node_base::base_ptr base_ptr;
+  typedef _rb_tree_node<Val>* link_type;
   typedef std::bidirectional_iterator_tag iterator_category;
   typedef std::ptrdiff_t difference_type;
 
-  // member object
-  _rb_tree_node_base* _m_node;
+  typedef _rb_tree_iterator<Val, Ref, Ptr> _self;
 
-  // Constructors
+  // member object
+  base_ptr _m_node;
+
+  // Constructor
   _rb_tree_iterator(void) {}
-  _rb_tree_iterator(_rb_tree_iterator* x) { _m_node = x; }
-  _rb_tree_iterator(const _rb_tree_iterator& other) : _m_node(other._m_node) {}
+
+  // node_base constructor
+  _rb_tree_iterator(base_ptr node) : _m_node(node) {}
+
+  // Copy Constructor
+  _rb_tree_iterator(const _self& other) : _m_node(other._m_node) {}
 
   // destructor
   ~_rb_tree_iterator(void) {}
@@ -85,14 +91,63 @@ struct _rb_tree_iterator {
     return *this;
   }
 
-  reference operator*(void) const { return _rb_tree_node(_m_node)->value; }
-  pointer operator->(void) const;
+  reference operator*(void) const { return static_cast<link_type>(_m_node)->_m_value_field; }
+  pointer operator->(void) const { return &(static_cast<link_type>(_m_node)->_m_value_field); }
 
-  _rb_tree_iterator& operator++(void);
-  _rb_tree_iterator operator++(void);
+  _self& operator++(void) {
+    increment();
+    return *this;
+  }
+  _self operator++(int) {
+    _self tmp = *this;
+    increment();
+    return tmp;
+  }
 
-  _rb_tree_iterator& operator--(void);
-  _rb_tree_iterator operator--(void);
+  _self& operator--(void) {
+    decrement();
+    return *this;
+  }
+  _self operator--(int) {
+    _self tmp = *this;
+    decrement();
+    return tmp;
+  }
+
+  void increment(void) {
+    if (_m_node->_m_right != NULL) {
+      _m_node = _m_node->_m_right;
+      while (_m_node->_m_left != NULL) {
+        _m_node = _m_node->_m_left;
+      }
+    } else {  // InOrder L-ROOT-R
+      base_ptr parent = _m_node->_m_parent;
+
+      while (_m_node == parent->_m_right) {
+        _m_node = parent;
+        parent = parent->_m_parent;
+      }
+      // if (_m_node != root)
+      if (_m_node != _m_node->_m_parent) _m_node = parent;
+    }
+  }
+
+  void decrement(void) {
+    if (_m_node->_m_left != NULL) {
+      _m_node = _m_node->_m_left;
+      while (_m_node->_m_right != NULL) {
+        _m_node = _m_node->_m_right;
+      }
+    } else {
+      base_ptr parent = _m_node->_m_parent;
+
+      while (_m_node == parent->_m_left) {
+        _m_node = parent;
+        parent = parent->_m_parent;
+      }
+      _m_node = parent;
+    }
+  }
 };
 // Non-member function
 // ==
@@ -107,7 +162,7 @@ template <typename Val, typename Ref, typename Ptr>
 bool operator!=(const _rb_tree_iterator<Val, Ref, Ptr>& lhs,
                 const _rb_tree_iterator<Val, Ref, Ptr>& rhs) {
   return lhs._m_node != rhs._m_node;
-}
+};
 
 // !SECTION
 
@@ -131,17 +186,16 @@ class _rb_tree_base {
   _rb_tree_node_base _m_header;  // tree header
 
   // constructor
-  _rb_tree_base(const allocator_type& alloc)
-      : _m_node_allocator(alloc), _m_header(_m_node_allocator.allocate(1)) {}
+  _rb_tree_base(const allocator_type& alloc = allocator_type()) : _m_node_allocator(alloc) {}
 
   // get_allocator
   allocator_type get_allocator(void) const { return _m_node_allocator; }
 
   // allocate new node
-  link_type _get_node(void) { return _m_node_allocator.allocate(1); }
+  link_type get_node(void) { return _m_node_allocator.allocate(1); }
 
   // deallocate node
-  void _deallocate_node(_rb_tree_node<value_type>* p) { _m_node_allocator.deallocate(p, 1); }
+  void deallocate_node(_rb_tree_node<value_type>* p) { _m_node_allocator.deallocate(p, 1); }
 };
 // !SECTION
 
@@ -158,11 +212,13 @@ class _rb_tree_base {
 // TODO Add KeyOfValue template parameter when I needed
 // template <typename Key, typename Val, typename KeyOfValue, typename Compare,
 //           typename Alloc = std::allocator<Val> >
-template <typename Key, typename Val, typename Compare, typename Alloc = std::allocator<Val> >
-class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
+template <typename Key, typename Val, typename Compare = std::less<Key>,
+          typename Alloc = std::allocator<Val> >
+class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   // tree_base
  private:
   typedef _rb_tree_base<Val, Alloc> _Base;
+  typedef _rb_tree<Key, Val, Compare, Alloc> _self;
 
  public:
   typedef Key key_type;
@@ -189,43 +245,51 @@ class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
   typedef rb_tree_node* link_type;
 
  protected:
-  using _Base::_deallocate_node;
-  using _Base::_get_node;
   using _Base::_m_header;
   using _Base::_m_node_allocator;
+  using _Base::deallocate_node;
+  using _Base::get_node;
 
   size_type _m_node_count;
   key_compare _m_key_compare;
 
-  link_type _create_node(const value_type& value) {
-    link_type tmp = _get_node();
-
-    _m_node_allocator.construct(tmp->_m_value_field, value);
-    return tmp;
-  }
-
-  //_clone_node();
-
-  void destroy_node(link_type p) {
-    _m_node_allocator.destroy(p->_m_value_field);
-    _deallocate_node(p);
-  }
-
  public:
-  // map -> _m_tree(comp, alloc);
-  _rb_tree(const key_compare& comp, const allocator_type& alloc) : _Base(value_type, alloc) {}
+  // constructor
+  _rb_tree(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+      : _Base(alloc), _m_node_count(0), _m_key_compare(comp) {
+    _empty_initialize();
+  }
 
   // copy constructor
-  _rb_tree(const _rb_tree<key_type, value_type, key_compare, allocator_type>& other);
+  _rb_tree(const _self& other)
+      : _Base(other.get_allocator()), _m_node_count(0), _m_key_compare(other._m_key_compare) {
+    // if other is empty ??
+    // empty_initialize()
+    // else ???
+    // color, root, left, right
+    _m_node_count = other._m_node_count;
+  }
 
   // destructor
   ~_rb_tree(void) { clear(); }
 
   // operator=
-  _rb_tree<key_type, value_type, key_compare, allocator_type>& operator=(const _rb_tree<>& other) {}
+  _self& operator=(const _self& other) {
+    if (this != other) {
+      clear();
+      _m_node_count = 0;
+      _m_key_compare = other._m_key_compare;
+      if (other.get_root() == NULL) {
+        _m_header._m_parent = NULL;
+      } else {
+        _m_header._m_parent = other._m_header._m_parent;
+      }
+    }
+    return *this;
+  }
 
  public:
-  // SECTION for map functions
+  // SECTION public functions (map)
   // get allocator
   allocator_type get_allocator(void) const { return _Base::get_allocator(); }
 
@@ -233,7 +297,7 @@ class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
   value_type& at(const key_type key);
   const value_type& at(const key_type key) const;
 
-  value__type& operator[](const key_type& key);
+  value_type& operator[](const key_type& key);
 
   // 3. Iterators
   iterator begin(void);
@@ -249,14 +313,14 @@ class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
   const_reverse_iterator rend(void) const;
 
   // 4. Capacity
-  bool empty(void) const;
+  bool empty(void) const { return _m_node_count == 0; }
 
-  size_type size(void) const;
-  size_type max_size(void) const;
+  size_type size(void) const { return _m_node_count; }
+  size_type max_size(void) const { return _m_node_allocator.max_size(); }
 
   // 5. Modifiers
   // clear
-  void clear(void);
+  void clear(void) {}
 
   // insert - single element
   ft::pair<iterator, bool> insert(const value_type& val);
@@ -272,7 +336,7 @@ class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
   void erase(iterator first, iterator last);
 
   // swap
-  void swap(map& other);
+  void swap(_self& other);
 
   // 6. Lookup
   // count
@@ -295,9 +359,53 @@ class _rb_tree : protected _rb_tree_Base<Val, Alloc> {
   const_iterator upper_bound(const key_type& key) const;
 
   // 7. Observers
-  // key_compo
-  key_compare key_comp(void) const;
-  value_compare value_comp(void) const;
+  key_compare key_comp(void) const { return _m_key_compare; }
+
+  // !SECTION
+
+  // SECTION protected functions (node)
+ protected:
+  link_type& get_root(void) const { return static_cast<link_type>(_m_header._m_parent); }
+
+  link_type& get_left(link_type& node) const { return static_cast<link_type>(node->_m_left); }
+
+  link_type& get_right(link_type& node) const { return static_cast<link_type>(node->_m_right); }
+
+  link_type& get_parent(link_type& node) const { return static_cast<link_type>(node->_m_parent); }
+
+  link_type create_node(const value_type& value) {
+    link_type tmp = get_node();
+
+    _m_node_allocator.construct(tmp->_m_value_field, value);
+    return tmp;
+  }
+
+  link_type clone_node(const link_type other) {
+    link_type tmp = create_node(other->_m_value_field);
+
+    tmp->_m_color = other->_m_color;
+    tmp->_m_left = NULL;
+    tmp->_m_right = NULL;
+
+    return tmp;
+  }
+  // !SECTION
+
+  void destroy_node(link_type p) {
+    _m_node_allocator.destroy(p->_m_value_field);
+    deallocate_node(p);
+  }
+
+  // SECTION private functions
+ private:
+  void _empty_initialize(void) {
+    // _m_header initialization
+    _m_header._m_color = RED;
+    _m_header._m_parent = NULL;
+    _m_header._m_left = NULL;
+    _m_header._m_right = NULL;
+  }
+  // !SECTION
 };
 // !SECTION
 
