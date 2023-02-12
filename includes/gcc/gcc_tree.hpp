@@ -793,6 +793,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::operator=(
   return *this;
 }
 
+// SECTION _M_insert
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
 typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(_Base_ptr __x_, _Base_ptr __y_,
@@ -823,6 +824,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(_Base_ptr __x_, _
   ++_M_node_count;
   return iterator(__z);
 }
+// !SECTION
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
 typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
@@ -883,6 +885,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(const _Val& _
     __comp = _M_key_compare(_KeyOfValue()(__v), _S_key(__x));
     __x = __comp ? _S_left(__x) : _S_right(__x);
   }
+
   iterator __j = iterator(__y);
   if (__comp)
     if (__j == begin())

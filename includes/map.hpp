@@ -14,8 +14,9 @@
 #include <functional>  // std::less
 #include <memory>      // std::allocator
 
-#include "tree.hpp"     // ft::_rb_tree
-#include "utility.hpp"  // ft::pair
+#include "function.hpp"  // ft::select1st
+#include "tree.hpp"      // ft::_rb_tree
+#include "utility.hpp"   // ft::pair
 
 namespace ft {
 
@@ -55,9 +56,8 @@ class map {
 
  private:
   // tree type
-  typedef _rb_tree<key_type, value_type, key_compare, allocator_type> _rb_tree_type;
-  // typedef _rb_tree<key_type, value_type, select1st<value_type>, key_compare, allocator_type>
-  //     _rb_tree_type;
+  typedef _rb_tree<key_type, value_type, ft::select1st<value_type>, key_compare, allocator_type>
+      _rb_tree_type;
 
   // member object
   _rb_tree_type _m_tree;
