@@ -25,8 +25,9 @@ struct _rb_tree_iterator {
   typedef Ref reference;
   typedef Ptr pointer;
 
-  typedef _rb_tree_node_base::base_ptr base_ptr;
-  typedef _rb_tree_node<Val>* link_type;
+  // typedef typename ft::_rb_tree_node_base::base_ptr base_ptr;
+  typedef ft::_rb_tree_node_base* base_ptr;
+  typedef ft::_rb_tree_node<Val>* link_type;
   typedef std::bidirectional_iterator_tag iterator_category;
   typedef std::ptrdiff_t difference_type;
 
