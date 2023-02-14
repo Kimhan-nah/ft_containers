@@ -877,8 +877,8 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
 pair<typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator, bool>
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(const _Val& __v) {
-  _Link_type __y = _M_end();
   _Link_type __x = _M_root();
+  _Link_type __y = _M_end();
   bool __comp = true;
   while (__x != 0) {
     __y = __x;
@@ -902,19 +902,20 @@ typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(iterator __position,
                                                                    const _Val& __v) {
   if (__position._M_node == this->_M_header._M_left) {
-    // begin()
+    // begin() == 최소값인 경우
     if (size() > 0 && _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node)))
       return _M_insert(__position._M_node, __position._M_node, __v);
     // first argument just needs to be non-null
     else
       return insert_unique(__v).first;
   } else if (__position._M_node == &this->_M_header) {
-    // end()
+    // end() == 최대값인 경우?
     if (_M_key_compare(_S_key(_M_rightmost()), _KeyOfValue()(__v)))
       return _M_insert(0, _M_rightmost(), __v);
     else
       return insert_unique(__v).first;
   } else {
+    // 나머지 경우 == ??
     iterator __before = __position;
     --__before;
     if (_M_key_compare(_S_key(__before._M_node), _KeyOfValue()(__v)) &&

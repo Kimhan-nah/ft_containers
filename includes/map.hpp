@@ -99,10 +99,31 @@ class map {
   allocator_type get_allocator(void) const { return _m_tree.get_node_allocator(); }
 
   // 2. Element access
-  value_type& at(const key_type key) { return _m_tree.at(key); }
-  const value_type& at(const key_type key) const { return _m_tree.at(key); }
+  /**
+   * @brief Returns a reference to the mapped value of the element with key equivalent to key. If no
+   * such element exists, an exception of type std::out_of_range is thrown.
+   * CHECK It is not C++98. is it C++11??
+   */
+  mapped_type& at(const key_type key) {
+    iterator iter = find(key);
+    if (iter == end()) {
+      throw std::out_of_range("ft::map::at");
+    }
+    return iter->second;
+  }
+  const mapped_type& at(const key_type key) const {
+    const_iterator iter = find(key);
+    if (iter == end()) {
+      throw std::out_of_range("ft::map::at");
+    }
+    return iter->second;
+  }
 
-  value_type& operator[](const key_type& key) {
+  /**
+   * @brief find key, if there are no the key, insert new
+   */
+  mapped_type& operator[](const key_type& key) {
+    // tree_iterator
     iterator iter = find(key);
     if (iter == end()) {
       iter = insert(value_type(key, mapped_type())).first;
@@ -155,7 +176,7 @@ class map {
 
   // 6. Lookup
   // count
-  // size_type count(const key_type& key) const { return _m_tree.count(key); }
+  size_type count(const key_type& key) const { return _m_tree.count(key); }
 
   // find
   iterator find(const key_type& key) { return _m_tree.find(key); }
