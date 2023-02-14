@@ -53,7 +53,7 @@ _deps
 # idea
 .idea
 *.DS_Store
-.vscode/*
+.vscode/
 
 # tester
 includes/containers_test
