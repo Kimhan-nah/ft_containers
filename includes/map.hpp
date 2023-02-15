@@ -33,7 +33,7 @@ namespace ft {
  * 				== value_type
  */
 template <typename Key, typename T, typename Compare = std::less<Key>,
-          typename Alloc = std::allocator<ft::pair<const Key, T> > >
+          typename Alloc = std::allocator<ft::pair<Key, T> > >
 class map {
  public:
   // SECTION member types
@@ -52,7 +52,18 @@ class map {
   /**
    * @brief nested function class to compare elements
    */
-  class value_compare : public std::binary_function<value_type, value_type, bool> {};
+  class value_compare : public std::binary_function<value_type, value_type, bool> {
+    friend class map<Key, T, Compare, Alloc>;
+
+   protected:
+    Compare comp;
+    value_compare(Compare c) : comp(c) {}
+
+   public:
+    bool operator()(const value_type& x, const value_type& y) const {
+      return comp(x.first, y.first);
+    }
+  };
 
  private:
   typedef _rb_tree<key_type, value_type, ft::select1st<value_type>, key_compare, allocator_type>
@@ -75,12 +86,11 @@ class map {
       : _m_tree(comp, alloc) {}
 
   // range
-  template <class InputIt>
+  template <typename InputIt>
   map(InputIt first, InputIt last, const Compare& comp = Compare(),
       const allocator_type& alloc = allocator_type())
       : _m_tree(comp, alloc) {
-    // TODO MODIFY first ~ last
-    _m_tree.insert(first, last);
+    _m_tree.insert_unique(first, last);
   }
 
   // copy constructor
@@ -100,9 +110,9 @@ class map {
 
   // 2. Element access
   /**
-   * @brief Returns a reference to the mapped value of the element with key equivalent to key. If no
-   * such element exists, an exception of type std::out_of_range is thrown.
-   * CHECK It is not C++98. is it C++11??
+   * @brief Returns a reference to the mapped value of the element with key equivalent to key. If
+   * no such element exists, an exception of type std::out_of_range is thrown. CHECK It is not
+   * C++98. is it C++11??
    */
   mapped_type& at(const key_type key) {
     iterator iter = find(key);
@@ -155,15 +165,15 @@ class map {
   void clear(void) { _m_tree.clear(); }
 
   // insert - single element
-  ft::pair<iterator, bool> insert(const value_type& val) { return _m_tree.insert(val); }
-  // insert -with hint
+  ft::pair<iterator, bool> insert(const value_type& val) { return _m_tree.insert_unique(val); }
+  // insert_unique -with hint
   iterator insert(iterator position, const value_type& val) {
-    return _m_tree.insert(position, val);
+    return _m_tree.insert_unique(position, val);
   }
   // insert - range
   template <class InputIter>
   void insert(InputIter first, InputIter last) {
-    _m_tree.insert(first, last);
+    _m_tree.insert_unique(first, last);
   }
 
   // erase
@@ -183,11 +193,10 @@ class map {
   const_iterator find(const key_type& key) const { return _m_tree.find(key); }
 
   /// equal_range
-  // ft::pair<iterator, iterator> equal_range(const key_type& key) { return
-  // _m_tree.equal_range(key); } ft::pair<const_iterator, const_iterator> equal_range(const
-  // key_type& key) const {
-  //   return _m_tree.equal_range(key);
-  // }
+  ft::pair<iterator, iterator> equal_range(const key_type& key) { return _m_tree.equal_range(key); }
+  ft::pair<const_iterator, const_iterator> equal_range(const key_type& key) const {
+    return _m_tree.equal_range(key);
+  }
 
   // lower_bound
   iterator lower_bound(const key_type& key) { return _m_tree.lower_bound(key); }
@@ -238,7 +247,9 @@ bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
 
 // swap
 template <class Key, class T, class Compare, class Alloc>
-void swap(ft::map<Key, T, Compare, Alloc>& lhs, ft::map<Key, T, Compare, Alloc>& rhs);
+void swap(ft::map<Key, T, Compare, Alloc>& lhs, ft::map<Key, T, Compare, Alloc>& rhs) {
+  lhs.swap(rhs);
+}
 
 }  // namespace ft
 #endif

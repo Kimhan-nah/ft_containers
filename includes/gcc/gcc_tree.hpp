@@ -546,12 +546,14 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   size_type _M_node_count;  // keeps track of size of tree
   _Compare _M_key_compare;
 
-  _Link_type& _M_root() const { return (_Link_type&)this->_M_header._M_parent; }
+  _Link_type& M_root() const { return (_Link_type&)this->_M_header._M_parent; }
 
   _Link_type& _M_leftmost() const { return (_Link_type&)this->_M_header._M_left; }
 
   _Link_type& _M_rightmost() const { return (_Link_type&)this->_M_header._M_right; }
 
+  // &_m_header : const ?
+  // link_type : _rb_tree_node ??
   _Link_type _M_end() const { return (_Link_type) & this->_M_header; }
 
   static _Link_type& _S_left(_Link_type __x) { return (_Link_type&)(__x->_M_left); }
@@ -974,6 +976,7 @@ void _Rb_tree<_Key, _Val, _KoV, _Cmp, _Alloc>::insert_unique(_II __first, _II __
   for (; __first != __last; ++__first) insert_unique(*__first);
 }
 
+// SECTION erase(iterator position)
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
 inline void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(iterator __position) {
   _Link_type __y =
@@ -982,6 +985,7 @@ inline void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(iterator 
   destroy_node(__y);
   --_M_node_count;
 }
+// !SECTION
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
 typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::size_type
@@ -994,29 +998,31 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(const _Key& __x) {
 
 template <typename _Key, typename _Val, typename _KoV, typename _Compare, typename _Alloc>
 typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::_Link_type
-_Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::_M_copy(_Link_type __x, _Link_type __p) {
-  // Structural copy.  __x and __p must be non-null.
-  _Link_type __top = _M_clone_node(__x);
-  __top->_M_parent = __p;
+_Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::_M_copy(_Link_type src_current,
+                                                      _Link_type dst_parent) {
+  // Structural copy.  src_current and dst_parent must be non-null.
+  _Link_type dst_current = _M_clone_node(src_current);
+  dst_current->_M_parent = dst_parent;
 
   try {
-    if (__x->_M_right) __top->_M_right = _M_copy(_S_right(__x), __top);
-    __p = __top;
-    __x = _S_left(__x);
+    if (src_current->_M_right) dst_current->_M_right = _M_copy(_S_right(src_current), dst_current);
+    //
+    dst_parent = dst_current;
+    src_current = _S_left(src_current);
 
-    while (__x != 0) {
-      _Link_type __y = _M_clone_node(__x);
-      __p->_M_left = __y;
-      __y->_M_parent = __p;
-      if (__x->_M_right) __y->_M_right = _M_copy(_S_right(__x), __y);
-      __p = __y;
-      __x = _S_left(__x);
+    while (src_current != 0) {
+      _Link_type __y = _M_clone_node(src_current);
+      dst_parent->_M_left = __y;
+      __y->_M_parent = dst_parent;
+      if (src_current->_M_right) __y->_M_right = _M_copy(_S_right(src_current), __y);
+      dst_parent = __y;
+      src_current = _S_left(src_current);
     }
   } catch (...) {
-    _M_erase(__top);
+    _M_erase(dst_current);
     __throw_exception_again;
   }
-  return __top;
+  return dst_current;
 }
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare, typename _Alloc>
