@@ -44,38 +44,38 @@ struct pair {
 // SECTION Non-member functions
 // SECTION relational operators
 // ==
-template <class T1, class T2>
-bool operator==(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator==(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return lhs.first == rhs.first && lhs.second == rhs.second;
 }
 
 // !=
-template <class T1, class T2>
-bool operator!=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator!=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return !(lhs == rhs);
 }
 
 // < : lexicographical compare
-template <class T1, class T2>
-bool operator<(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator<(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
 }
 
 // <= : lexicographical compare
-template <class T1, class T2>
-bool operator<=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator<=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return !(rhs < lhs);
 }
 
 // > : lexicographical compare
-template <class T1, class T2>
-bool operator>(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator>(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return rhs < lhs;
 }
 
 // >= : lexicographical compare
-template <class T1, class T2>
-bool operator>=(const std::pair<T1, T2>& lhs, const std::pair<T1, T2>& rhs) {
+template <typename T1, typename T2>
+bool operator>=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs) {
   return !(lhs < rhs);
 }
 // !SECTION relational operators

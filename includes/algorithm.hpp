@@ -87,6 +87,13 @@ void _swap(T& a, T& b) {
   b = tmp;
 }
 
+// template <typename Tp>
+// void _swap(Tp& a, Tp& b) {
+//   Tp tmp = a;
+//   a = b;
+//   b = tmp;
+// }
+
 }  // namespace ft
 
 #endif

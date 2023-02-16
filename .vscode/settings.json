@@ -71,6 +71,14 @@
 		"stdexcept": "cpp",
 		"streambuf": "cpp",
 		"typeinfo": "cpp",
-		"llvm_map": "cpp"
+		"llvm_map": "cpp",
+		"__functional_03": "cpp",
+		"__functional_base_03": "cpp",
+		"csignal": "cpp",
+		"fstream": "cpp",
+		"iomanip": "cpp",
+		"cassert": "cpp",
+		"filesystem": "cpp",
+		"*.ipp": "cpp"
 	}
 }

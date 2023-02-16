@@ -13,7 +13,6 @@
 
 #include <cstddef>     // std::ptrdiff_t, std::size_t
 #include <functional>  // std::less
-#include <iostream>    // TODO delete this
 #include <iterator>    // std::bidirectional_iterator_tag
 #include <memory>      // std::allocator<T>
 
@@ -176,7 +175,8 @@ struct _rb_tree_iterator {
     }
   }
 };
-// Non-member function
+// SECTION Non-member function
+// SECTION iterator non-member function
 // (const_)iterator == (const_)iterator
 template <typename Val, typename Ref, typename Ptr>
 bool operator==(const _rb_tree_iterator<Val, Ref, Ptr>& lhs,
@@ -219,6 +219,9 @@ bool operator!=(const _rb_tree_iterator<Val, Val&, Val*>& lhs,
   return lhs._m_node != rhs._m_node;
 };
 
+// !SECTION iterator non-member function
+
+// !SECTION
 // !SECTION
 
 // SECTION rb_tree_base
@@ -271,7 +274,7 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   // tree_base
  private:
   typedef _rb_tree_base<Val, Alloc> _Base;
-  typedef _rb_tree<Key, Val, Compare, Alloc> _self;
+  typedef _rb_tree<Key, Val, KeyOfValue, Compare, Alloc> _self;
 
  public:
   typedef Key key_type;
@@ -314,21 +317,16 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   }
 
   // copy constructor
-  // _rb_tree(const _self& other)
   _rb_tree(const _rb_tree& other)
       : _Base(other.get_node_allocator()), _m_node_count(0), _m_key_compare(other._m_key_compare) {
-    // std::cout << "\n=== tree copy construcctor called===\n";
     if (other._root() == NULL) {
       _initialize_header();
     } else {
-      _m_header._m_color = RED;
+      // _m_header._m_color = RED;
       _m_header._m_parent = _copy_tree(other._root(), _end());
-      _m_header._m_left = _minimum(_root());
-      _m_header._m_right = _maximum(_root());
-      _m_header._m_parent->_m_parent = &_m_header;
-      // _root() = _copy_tree(other._root(), _end());
-      // _leftmost() = other._leftmost();
-      // _rightmost() = other._rightmost();
+      _m_header._m_left = _minimum(_root());        // lefmost
+      _m_header._m_right = _maximum(_root());       // rightmost
+      _m_header._m_parent->_m_parent = &_m_header;  // CHECK header	 <- ??
     }
     _m_node_count = other._m_node_count;
   }
@@ -337,27 +335,20 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   ~_rb_tree(void) {}
 
   // operator=
-  // _self& operator=(const _self& other) {
   _rb_tree& operator=(const _rb_tree& other) {
     if (this != &other) {
       clear();
       _m_node_count = 0;
       _m_key_compare = other._m_key_compare;
-      if (other._root() == NULL) {  // reset header
-        _m_header._m_parent = NULL;
-        _m_header._m_left = _end();
-        _m_header._m_right = _end();
-        // _root() = NULL;             //_m_header._m_parent = NULL;
-        // _leftmost() = _end();       // _m_header._m_left = _end();
-        // _rightmost() = _end();      // _m_header._m_right = _end();
+      if (other._root() == NULL) {    // reset header
+        _m_header._m_parent = NULL;   // root
+        _m_header._m_left = _end();   // leftmost
+        _m_header._m_right = _end();  // rightmost
       } else {
-        _m_header._m_parent = _copy_tree(other._root(), _end());
-        _m_header._m_left = _minimum(_root());
-        _m_header._m_right = _maximum(_root());
-        _m_node_count = other._m_node_count;
-
-        // _leftmost() = _minimum(_root());
-        // _rightmost() = _maximum(_root());
+        _m_header._m_parent = _copy_tree(other._root(), _end());  // root
+        _m_header._m_left = _minimum(_root());                    // leftmost
+        _m_header._m_right = _maximum(_root());                   // rightmost
+        _m_node_count = other._m_node_count;                      // node_count
       }
     }
     return *this;
@@ -394,11 +385,8 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   void clear(void) {
     if (_m_node_count != 0) {
       _erase(_root());
-      // _leftmost() = _end();
       _m_header._m_left = &_m_header;
-      // _root() = 0;
       _m_header._m_parent = NULL;
-      // _rightmost() = _end();
       _m_header._m_right = &_m_header;
       _m_node_count = 0;
     }
@@ -412,8 +400,6 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
    */
   ft::pair<iterator, bool> insert_unique(const value_type& val) {
     link_type loc = _root();        // root
-                                    // _end : _rb_tree_node*
-                                    // loc_parent
     link_type loc_parent = _end();  // header
     bool is_left = true;
 
@@ -422,9 +408,6 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
       is_left = _m_key_compare(KeyOfValue()(val), _get_key(loc));
       loc = is_left ? _left(loc) : _right(loc);
     }
-
-    // std::cout << std::endl;
-    // this->printBT();  // FIXME: test code
 
     iterator iter(loc_parent);
     if (is_left) {  // 마지막에 왼쪽으로 내려온 경우
@@ -456,7 +439,6 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
       if (position != end() &&  // size() > 0
           _m_key_compare(KeyOfValue()(val),
                          _get_key(position._m_node))) {  // val < *hint
-        // TODO update minimum?
         return _insert(position._m_node, position._m_node, val);
       } else {  // invalid hint => single element function call
         return insert_unique(val).first;
@@ -489,7 +471,6 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   }
 
   // insert - range
-  // TODO enable_if
   template <typename InputIter>
   void insert_unique(InputIter first, InputIter last) {
     for (; first != last; ++first) {
@@ -499,36 +480,63 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
 
   // erase
   void erase(iterator position) {
-    link_type node = (link_type)_rebalance_for_erase(position._m_node, _m_header._m_parent,
-                                                     _m_header._m_left, _m_header._m_right);
+    link_type node = static_cast<link_type>(_rebalance_for_erase(
+        position._m_node, _m_header._m_parent, _m_header._m_left, _m_header._m_right));
+    // link_type node = (link_type)_rebalance_for_erase(position._m_node, _m_header._m_parent,
+    //                                                  _m_header._m_left, _m_header._m_right);
     _destroy_node(node);
     --_m_node_count;
+    // printBT();
   }
 
   size_type erase(const key_type& key) {
-    pair<iterator, iterator> __p = equal_range(key);
+    ft::pair<iterator, iterator> __p = equal_range(key);
     size_type __n = std::distance(__p.first, __p.second);
     erase(__p.first, __p.second);
     return __n;
   }
 
+  // [first, last)
   void erase(iterator first, iterator last) {
-    if (first == begin() && last == end())
+    if (first == begin() && last == end()) {
       clear();
-    else
+    } else {
       while (first != last) {
-        erase(first);
-        ++first;
+        iterator tmp(first++);
+        erase(tmp);
       }
+    }
   }
 
   // swap
   void swap(_self& other) {
-    if (_root() != NULL) {
+    if (_root() == NULL) {
+      if (other._root() != NULL) {
+        *this = other;  // assign operator=
+
+        // reset other tree
+        other._m_header._m_parent = NULL;         // root
+        other._m_header._m_left = other._end();   // leftmost
+        other._m_header._m_right = other._end();  // rightmost
+      }
     } else if (other._root() == NULL) {
+      other = *this;  // assign operator=
+
+      // reset this tree
+      _m_header._m_parent = NULL;   // root
+      _m_header._m_left = _end();   // leftmost
+      _m_header._m_right = _end();  // rightmost
+
     } else {
+      ft::_swap(_m_header._m_parent, other._m_header._m_parent);
+      ft::_swap(_m_header._m_left, other._m_header._m_left);
+      ft::_swap(_m_header._m_right, other._m_header._m_right);
+
+      _root()->_m_parent = _end();
+      other._root()->_m_parent = other._end();
     }
-    // no
+    ft::_swap(this->_m_node_count, other._m_node_count);
+    ft::_swap(this->_m_key_compare, other._m_key_compare);
   }
 
   // 6. Lookup
@@ -772,12 +780,9 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
   }
 
   /**
-   * @brief
-   *
-   * @param x
+   * @brief erase without rebalancing for clear()
    */
   void _erase(link_type x) {
-    // Erase without rebalancing.
     while (x != NULL) {
       _erase(_right(x));
       link_type y = _left(x);
@@ -786,7 +791,7 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
     }
   }
 
-  // FIXME: test code BEGIN
+  // for test code BEGIN
   void printBT(const std::string& prefix, const link_type node, bool isLeft) {
     if (node != nullptr) {
       std::cout << prefix;
@@ -804,14 +809,12 @@ class _rb_tree : protected _rb_tree_base<Val, Alloc> {
 
   void printBT() { printBT("", static_cast<link_type>(this->_m_header._m_parent), false); }
 
-  // FIXME : test code END
-
   // !SECTION
 };
 // !SECTION
 
 // SECTION Non-member function
-// CHECK check rotate functions
+
 void _rotate_left(_rb_tree_node_base* x, _rb_tree_node_base*& root) {
   _rb_tree_node_base* y = x->_m_right;
   x->_m_right = y->_m_left;
@@ -880,24 +883,35 @@ void _rebalance_for_insert(_rb_tree_node_base* x, _rb_tree_node_base*& root) {
   root->_m_color = BLACK;
 }
 
+/**
+ * @brief erase with rebalance
+ *
+ * @param __z - 삭제하려는 노드
+ * @param __root - root node
+ * @param __leftmost - tree에서 최소값 (header의 left)
+ * @param __rightmost - tree에서 최대값 (header의 right)
+ * @return _rb_tree_node_base* - 삭제하려는 노드
+ */
 _rb_tree_node_base* _rebalance_for_erase(_rb_tree_node_base* __z, _rb_tree_node_base*& __root,
                                          _rb_tree_node_base*& __leftmost,
                                          _rb_tree_node_base*& __rightmost) {
-  _rb_tree_node_base* __y = __z;
-  _rb_tree_node_base* __x = 0;
-  _rb_tree_node_base* __x_parent = 0;
-  if (__y->_m_left == 0)        // __z has at most one non-null child. y == z.
-    __x = __y->_m_right;        // __x might be null.
-  else if (__y->_m_right == 0)  // __z has exactly one non-null child. y == z.
-    __x = __y->_m_left;         // __x is not null.
-  else {
-    // __z has two non-null children.  Set __y to
-    __y = __y->_m_right;  //   __z's successor.  __x might be null.
-    while (__y->_m_left != 0) __y = __y->_m_left;
+  _rb_tree_node_base* __y = __z;  // 실제 삭제하려는 successor node (return)
+  _rb_tree_node_base* __x = NULL;
+  _rb_tree_node_base* __x_parent = NULL;
+
+  if (__y->_m_left == NULL) {
     __x = __y->_m_right;
+
+  } else if (__y->_m_right == NULL) {
+    __x = __y->_m_left;
+
+  } else {  // 자식이 2명인 경우 -> successor
+    __y = __y->_m_right;
+    while (__y->_m_left != NULL) __y = __y->_m_left;
+    __x = __y->_m_right;  // x = successor's right child node
   }
-  if (__y != __z) {
-    // relink y in place of z.  y is z's successor
+
+  if (__y != __z) {  // successor 선택한 경우
     __z->_m_left->_m_parent = __y;
     __y->_m_left = __z->_m_left;
     if (__y != __z->_m_right) {
@@ -906,19 +920,25 @@ _rb_tree_node_base* _rebalance_for_erase(_rb_tree_node_base* __z, _rb_tree_node_
       __y->_m_parent->_m_left = __x;  // __y must be a child of _m_left
       __y->_m_right = __z->_m_right;
       __z->_m_right->_m_parent = __y;
-    } else
+    } else {
       __x_parent = __y;
-    if (__root == __z)
-      __root = __y;
-    else if (__z->_m_parent->_m_left == __z)
+    }
+
+    // 형제 노드?
+    if (__root == __z) {                          // 삭제하려는 노드가 root인 경우
+      __root = __y;                               // root에 successor 대입
+    } else if (__z->_m_parent->_m_left == __z) {  // 노드가 부모의 왼쪽 자식일 때
       __z->_m_parent->_m_left = __y;
-    else
+    } else {  // 오른쪽 자식일 때
       __z->_m_parent->_m_right = __y;
+    }
+
     __y->_m_parent = __z->_m_parent;
-    std::swap(__y->_m_color, __z->_m_color);
+    // ft::_swap(__y->_m_color, __z->_m_color);
+    ft::_swap(__y->_m_color, __z->_m_color);
     __y = __z;
     // __y now points to node to be actually deleted
-  } else {  // __y == __z
+  } else {  // y가 처음 삭제하려는 노드 그대로인 경우
     __x_parent = __y->_m_parent;
     if (__x) __x->_m_parent = __y->_m_parent;
     if (__root == __z)
@@ -945,7 +965,9 @@ _rb_tree_node_base* _rebalance_for_erase(_rb_tree_node_base* __z, _rb_tree_node_
       }
     }
   }
-  if (__y->_m_color != RED) {
+
+  // BLACK이면 속성 위반 -> extra black 부여 -> doubly black 해결해야 함
+  if (__y->_m_color != RED) {  // 삭제하려는 노드가 BLACK인 경우 ->
     while (__x != __root && (__x == 0 || __x->_m_color == BLACK)) {
       if (__x == __x_parent->_m_left) {
         _rb_tree_node_base* __w = __x_parent->_m_right;
@@ -1006,6 +1028,23 @@ _rb_tree_node_base* _rebalance_for_erase(_rb_tree_node_base* __z, _rb_tree_node_
   }
   return __y;
 }
+
+// SECTION rb_tree non-member function
+// ==
+template <typename Key, typename Val, typename KeyOfValue, typename Compare, typename Alloc>
+bool operator==(const _rb_tree<Key, Val, KeyOfValue, Compare, Alloc>& lhs,
+                const _rb_tree<Key, Val, KeyOfValue, Compare, Alloc>& rhs) {
+  return lhs.size() == rhs.size() && equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+// <
+template <typename Key, typename Val, typename KeyOfValue, typename Compare, typename Alloc>
+bool operator<(const _rb_tree<Key, Val, KeyOfValue, Compare, Alloc>& lhs,
+               const _rb_tree<Key, Val, KeyOfValue, Compare, Alloc>& rhs) {
+  return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+// !SECTION rb_tree non-member function
 
 }  // namespace ft
 
