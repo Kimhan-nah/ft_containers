@@ -16,9 +16,10 @@
 #include <iterator>    // std::bidirectional_iterator_tag
 #include <memory>      // std::allocator<T>
 
-#include "function.hpp"  // ft::select1st
-#include "iterator.hpp"  // ft::reverse_iterator
-#include "utility.hpp"   // ft::pair
+#include "algorithm.hpp"  // ft::_swap
+#include "function.hpp"   // ft::select1st
+#include "iterator.hpp"   // ft::reverse_iterator
+#include "utility.hpp"    // ft::pair
 
 namespace ft {
 enum _rb_tree_color { RED = false, BLACK = true };
